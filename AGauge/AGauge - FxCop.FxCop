@@ -322,49 +322,13 @@
              </Message>
             </Messages>
            </Member>
-           <Member Name="#ValueInRangeChanged" Kind="Event">
-            <Messages>
-             <Message TypeName="IdentifiersShouldHaveCorrectSuffix" Category="Microsoft.Naming" CheckId="CA1710" Created="2012-08-24 14:07:06Z">
-              <Issue>
-               <Item>'AGauge.ValueInRangeChangedDelegate'</Item>
-               <Item>EventHandler</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
           </Members>
          </Type>
-         <Type Name="AGauge+NeedleColorEnum">
+         <Type Name="AGauge+NeedleColor">
           <Messages>
-           <Message TypeName="IdentifiersShouldNotHaveIncorrectSuffix" Category="Microsoft.Naming" CheckId="CA1711" Created="2012-08-24 14:07:06Z">
-            <Issue Name="TypeNoAlternate">
-             <Item>'AGauge.NeedleColorEnum'</Item>
-             <Item>Enum</Item>
-            </Issue>
-           </Message>
-           <Message TypeName="NestedTypesShouldNotBeVisible" Category="Microsoft.Design" CheckId="CA1034" Created="2012-08-24 14:07:06Z">
+           <Message TypeName="NestedTypesShouldNotBeVisible" Category="Microsoft.Design" CheckId="CA1034" Created="2012-08-24 14:52:28Z">
             <Issue>
-             <Item>'AGauge.NeedleColorEnum'</Item>
-            </Issue>
-           </Message>
-          </Messages>
-         </Type>
-         <Type Name="AGauge+ValueInRangeChangedDelegate">
-          <Messages>
-           <Message TypeName="IdentifiersShouldNotHaveIncorrectSuffix" Category="Microsoft.Naming" CheckId="CA1711" Created="2012-08-24 14:07:06Z">
-            <Issue Name="TypeNoAlternate">
-             <Item>'AGauge.ValueInRangeChangedDelegate'</Item>
-             <Item>Delegate</Item>
-            </Issue>
-           </Message>
-           <Message TypeName="NestedTypesShouldNotBeVisible" Category="Microsoft.Design" CheckId="CA1034" Created="2012-08-24 14:07:06Z">
-            <Issue>
-             <Item>'AGauge.ValueInRangeChangedDelegate'</Item>
-            </Issue>
-           </Message>
-           <Message TypeName="UseGenericEventHandlerInstances" Category="Microsoft.Design" CheckId="CA1003" Created="2012-08-24 14:07:06Z">
-            <Issue>
-             <Item>'AGauge.ValueInRangeChangedDelegate'</Item>
+             <Item>'AGauge.NeedleColor'</Item>
             </Issue>
            </Message>
           </Messages>
@@ -377,17 +341,6 @@
             </Issue>
            </Message>
           </Messages>
-          <Members>
-           <Member Name="#valueInRange">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2012-08-24 14:07:06Z">
-              <Issue>
-               <Item>'AGauge.ValueInRangeChangedEventArgs.valueInRange'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
          </Type>
         </Types>
        </Namespace>
@@ -403,23 +356,14 @@
    <Rule TypeName="DisposableFieldsShouldBeDisposed" Category="Microsoft.Usage" CheckId="CA2213">
     <Resolution Name="Default">{0} contains field {1} that is of IDisposable type: {2}. Change the Dispose method on {0} to call Dispose or Close on this field.</Resolution>
    </Rule>
-   <Rule TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051">
-    <Resolution Name="Default">Because field {0} is visible outside of its declaring type, change its accessibility to private and add a property, with the same accessibility as the field has currently, to provide access to it.</Resolution>
-   </Rule>
    <Rule TypeName="DoNotInitializeUnnecessarily" Category="Microsoft.Performance" CheckId="CA1805">
     <Resolution Name="Default">{0} initializes field {1} of type {2} to {3}. Remove this initialization because it will be done automatically by the runtime.</Resolution>
    </Rule>
    <Rule TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704">
     <Resolution Name="Member">Correct the spelling of '{0}' in member name {1} or remove it entirely if it represents any sort of Hungarian notation.</Resolution>
    </Rule>
-   <Rule TypeName="IdentifiersShouldHaveCorrectSuffix" Category="Microsoft.Naming" CheckId="CA1710">
-    <Resolution Name="Default">Rename {0} to end in '{1}'.</Resolution>
-   </Rule>
    <Rule TypeName="IdentifiersShouldNotContainUnderscores" Category="Microsoft.Naming" CheckId="CA1707">
     <Resolution Name="Member">Remove the underscores from member name {0}.</Resolution>
-   </Rule>
-   <Rule TypeName="IdentifiersShouldNotHaveIncorrectSuffix" Category="Microsoft.Naming" CheckId="CA1711">
-    <Resolution Name="TypeNoAlternate">Rename type name {0} so that it does not end in '{1}'.</Resolution>
    </Rule>
    <Rule TypeName="MarkAssembliesWithClsCompliant" Category="Microsoft.Design" CheckId="CA1014">
     <Resolution Name="Default">Mark {0} with CLSCompliant(true) because it exposes externally visible types.</Resolution>
@@ -444,9 +388,6 @@
    </Rule>
    <Rule TypeName="TestForEmptyStringsUsingStringLength" Category="Microsoft.Performance" CheckId="CA1820">
     <Resolution Name="IsNullOrEmpty">Replace the call to {0} in {1} with a call to 'String.IsNullOrEmpty'.</Resolution>
-   </Rule>
-   <Rule TypeName="UseGenericEventHandlerInstances" Category="Microsoft.Design" CheckId="CA1003">
-    <Resolution Name="Default">Remove {0} and replace its usage with EventHandler&lt;T&gt;</Resolution>
    </Rule>
   </Rules>
  </FxCopReport>
