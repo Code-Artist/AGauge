@@ -15,6 +15,7 @@ namespace AGaugeApp
         {
             if (disposing && (components != null))
             {
+                gaugeBitmap.Dispose();
                 components.Dispose();
             }
             base.Dispose(disposing);
