@@ -14,7 +14,6 @@ namespace AGaugeDemo
         public MainForm()
         {
             InitializeComponent();
-            aGauge1.Padding
         }
     }
 }

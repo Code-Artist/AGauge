@@ -28,32 +28,6 @@ using System.Diagnostics;
 
 namespace AGaugeApp
 {
-    /// <summary>
-    /// First needle color
-    /// </summary>
-    public enum AGaugeNeedleColor
-    {
-        Gray = 0,
-        Red = 1,
-        Green = 2,
-        Blue = 3,
-        Yellow = 4,
-        Violet = 5,
-        Magenta = 6
-    };
-
-    /// <summary>
-    /// Event argument for <see cref="ValueInRangeChanged"/> event.
-    /// </summary>
-    public class ValueInRangeChangedEventArgs : EventArgs
-    {
-        public Int32 Value { get; private set; }
-        public ValueInRangeChangedEventArgs(Int32 valueInRange)
-        {
-            this.Value = valueInRange;
-        }
-    }
-    
     [ToolboxBitmapAttribute(typeof(AGauge), "AGauge.bmp"),
     DefaultEvent("ValueInRangeChanged"),
     Description("Displays a value on an analog gauge. Raises an event if the value enters one of the definable ranges.")]
@@ -1530,6 +1504,32 @@ namespace AGaugeApp
 
         #endregion
 
+    }
+
+    /// <summary>
+    /// First needle color
+    /// </summary>
+    public enum AGaugeNeedleColor
+    {
+        Gray = 0,
+        Red = 1,
+        Green = 2,
+        Blue = 3,
+        Yellow = 4,
+        Violet = 5,
+        Magenta = 6
+    };
+
+    /// <summary>
+    /// Event argument for <see cref="ValueInRangeChanged"/> event.
+    /// </summary>
+    public class ValueInRangeChangedEventArgs : EventArgs
+    {
+        public Int32 Value { get; private set; }
+        public ValueInRangeChangedEventArgs(Int32 valueInRange)
+        {
+            this.Value = valueInRange;
+        }
     }
 
     /// <summary>
