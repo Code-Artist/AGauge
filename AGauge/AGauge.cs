@@ -26,16 +26,18 @@ using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.Diagnostics;
 
-
 namespace AGaugeApp
 {
-    [ToolboxBitmapAttribute(typeof(AGauge), "AGauge.bmp"), 
-    DefaultEvent("ValueInRangeChanged"), 
+    [ToolboxBitmapAttribute(typeof(AGauge), "AGauge.bmp"),
+    DefaultEvent("ValueInRangeChanged"),
     Description("Displays a value on an analog gauge. Raises an event if the value enters one of the definable ranges.")]
     public partial class AGauge : Control
     {
-#region enum, var, delegate, event
-        public enum NeedleColorEnum
+        #region enum, var, delegate, event
+        /// <summary>
+        /// First needle color
+        /// </summary>
+        public enum NeedleColor
         {
             Gray = 0,
             Red = 1,
@@ -57,10 +59,10 @@ namespace AGaugeApp
 
         private Single m_value;
         private Boolean[] m_valueIsInRange = { false, false, false, false, false };
-        private Byte m_CapIdx = 1;
-        private Color[] m_CapColor = { Color.Black, Color.Black, Color.Black, Color.Black, Color.Black };
-        private String[] m_CapText = { "", "", "", "", "" };
-        private Point[] m_CapPosition = { new Point(10, 10), new Point(10, 10), new Point(10, 10), new Point(10, 10), new Point(10, 10) };
+        private Byte m_CaptionIndex = 1;
+        private Color[] m_CaptionColor = { Color.Black, Color.Black, Color.Black, Color.Black, Color.Black };
+        private String[] m_CaptionsText = { "", "", "", "", "" };
+        private Point[] m_CaptionsPosition = { new Point(10, 10), new Point(10, 10), new Point(10, 10), new Point(10, 10), new Point(10, 10) };
         private Point m_Center = new Point(100, 100);
         private Single m_MinValue = -100;
         private Single m_MaxValue = 400;
@@ -105,75 +107,47 @@ namespace AGaugeApp
 
         private Int32 m_NeedleType = 0;
         private Int32 m_NeedleRadius = 80;
-        private NeedleColorEnum m_NeedleColor1 = NeedleColorEnum.Gray;
+        private NeedleColor m_NeedleColor1 = NeedleColor.Gray;
         private Color m_NeedleColor2 = Color.DimGray;
         private Int32 m_NeedleWidth = 2;
 
+        #endregion
+
+        #region EventHandler
+
+        /// <summary>
+        /// Event argument for <see cref="ValueInRangeChanged"/> event.
+        /// </summary>
         public class ValueInRangeChangedEventArgs : EventArgs
         {
-            public Int32 valueInRange;
-
+            public Int32 Value { get; private set; }
             public ValueInRangeChangedEventArgs(Int32 valueInRange)
             {
-                this.valueInRange = valueInRange;
+                this.Value = valueInRange;
             }
         }
-
-        public delegate void ValueInRangeChangedDelegate(Object sender, ValueInRangeChangedEventArgs e);
+        /// <summary>
+        /// Event raised if the value falls into a defined range.
+        /// </summary>
         [Description("This event is raised if the value falls into a defined range.")]
-        public event ValueInRangeChangedDelegate ValueInRangeChanged;
-#endregion
-
-#region hidden , overridden inherited properties
-        public new Boolean AllowDrop
+        public event EventHandler<ValueInRangeChangedEventArgs> ValueInRangeChanged;
+        private void OnValueInRangeChanged(int value)
         {
-            get
-            {
-                return false;
-            }
-            set
-            {
-
-            }
-        }
-        public new Boolean AutoSize
-        {
-            get
-            {
-                return false;
-            }
-            set
-            {
-
-            }
-        }
-        public new Boolean ForeColor
-        {
-            get
-            {
-                return false;
-            }
-            set
-            {
-            }
-        }
-        public new Boolean ImeMode
-        {
-            get
-            {
-                return false;
-            }
-            set
-            {
-            }
+            EventHandler<ValueInRangeChangedEventArgs> e = ValueInRangeChanged;
+            if (e != null) e(this, new ValueInRangeChangedEventArgs(value));
         }
 
+        #endregion
+
+        #region Hidden and overridden inherited properties
+
+        public new Boolean AllowDrop { get { return false; } set { /*Do Nothing */ } }
+        public new Boolean AutoSize { get { return false; } set { /*Do Nothing */ } }
+        public new Boolean ForeColor { get { return false; } set { /*Do Nothing */ } }
+        public new Boolean ImeMode { get { return false; } set { /*Do Nothing */ } }
         public override System.Drawing.Color BackColor
         {
-            get
-            {
-                return base.BackColor;
-            }
+            get { return base.BackColor; }
             set
             {
                 base.BackColor = value;
@@ -183,10 +157,7 @@ namespace AGaugeApp
         }
         public override System.Drawing.Font Font
         {
-            get
-            {
-                return base.Font;
-            }
+            get { return base.Font; }
             set
             {
                 base.Font = value;
@@ -196,10 +167,7 @@ namespace AGaugeApp
         }
         public override System.Windows.Forms.ImageLayout BackgroundImageLayout
         {
-            get
-            {
-                return base.BackgroundImageLayout;
-            }
+            get { return base.BackgroundImageLayout; }
             set
             {
                 base.BackgroundImageLayout = value;
@@ -207,6 +175,7 @@ namespace AGaugeApp
                 Refresh();
             }
         }
+
         #endregion
 
         public AGauge()
@@ -216,16 +185,14 @@ namespace AGaugeApp
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
         }
 
-#region properties
+        #region properties
+
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("AGauge"),
-        System.ComponentModel.Description("The value.")]
+        System.ComponentModel.Description("Gauge value.")]
         public Single Value
         {
-            get
-            {
-                return m_value;
-            }
+            get { return m_value; }
             set
             {
                 if (m_value != value)
@@ -243,41 +210,37 @@ namespace AGaugeApp
                         && (m_value <= m_RangeEndValue[counter])
                         && (m_RangeEnabled[counter]))
                         {
-                            if (!m_valueIsInRange[counter])
-                            {
-                                if (ValueInRangeChanged!=null)
-                                {
-                                    ValueInRangeChanged(this, new ValueInRangeChangedEventArgs(counter));
-                                }
-                            }
+                            if (!m_valueIsInRange[counter]) OnValueInRangeChanged(counter);
                         }
                         else
                         {
                             m_valueIsInRange[counter] = false;
                         }
-                    }                   
+                    }
                     Refresh();
                 }
             }
         }
 
+        #region << Gauge Captions >>
+
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("AGauge"),
         System.ComponentModel.RefreshProperties(RefreshProperties.All),
         System.ComponentModel.Description("The caption index. set this to a value of 0 up to 4 to change the corresponding caption's properties.")]
-        public Byte Cap_Idx
+        public Byte CaptionIndex
         {
             get
             {
-                return m_CapIdx;
+                return m_CaptionIndex;
             }
             set
             {
-                if ((m_CapIdx != value)
+                if ((m_CaptionIndex != value)
                 && (0 <= value)
                 && (value < 5))
                 {
-                    m_CapIdx = value;
+                    m_CaptionIndex = value;
                 }
             }
         }
@@ -285,18 +248,18 @@ namespace AGaugeApp
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("AGauge"),
         System.ComponentModel.Description("The color of the caption text.")]
-        private Color CapColor
+        private Color CaptionColor
         {
             get
             {
-                return m_CapColor[m_CapIdx];
+                return m_CaptionColor[m_CaptionIndex];
             }
             set
             {
-                if (m_CapColor[m_CapIdx] != value)
+                if (m_CaptionColor[m_CaptionIndex] != value)
                 {
-                    m_CapColor[m_CapIdx] = value;
-                    CapColors = m_CapColor;
+                    m_CaptionColor[m_CaptionIndex] = value;
+                    CaptionColors = m_CaptionColor;
                     drawGaugeBackground = true;
                     Refresh();
                 }
@@ -304,33 +267,33 @@ namespace AGaugeApp
         }
 
         [System.ComponentModel.Browsable(false)]
-        public Color[] CapColors
+        public Color[] CaptionColors
         {
             get
             {
-                return m_CapColor;
+                return m_CaptionColor;
             }
             set
             {
-                m_CapColor = value;
+                m_CaptionColor = value;
             }
         }
 
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("AGauge"),
         System.ComponentModel.Description("The text of the caption.")]
-        public String CapText
+        public String CaptionText
         {
             get
             {
-                return m_CapText[m_CapIdx];
+                return m_CaptionsText[m_CaptionIndex];
             }
             set
             {
-                if (m_CapText[m_CapIdx] != value)
+                if (m_CaptionsText[m_CaptionIndex] != value)
                 {
-                    m_CapText[m_CapIdx] = value;
-                    CapsText = m_CapText;
+                    m_CaptionsText[m_CaptionIndex] = value;
+                    CaptionsText = m_CaptionsText;
                     drawGaugeBackground = true;
                     Refresh();
                 }
@@ -338,17 +301,17 @@ namespace AGaugeApp
         }
 
         [System.ComponentModel.Browsable(false)]
-        public String[] CapsText
+        public String[] CaptionsText
         {
             get
             {
-                return m_CapText;
+                return m_CaptionsText;
             }
             set
             {
                 for (Int32 counter = 0; counter < 5; counter++)
                 {
-                    m_CapText[counter] = value[counter];
+                    m_CaptionsText[counter] = value[counter];
                 }
             }
         }
@@ -356,18 +319,18 @@ namespace AGaugeApp
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("AGauge"),
         System.ComponentModel.Description("The position of the caption.")]
-        public Point CapPosition
+        public Point CaptionPosition
         {
             get
             {
-                return m_CapPosition[m_CapIdx];
+                return m_CaptionsPosition[m_CaptionIndex];
             }
             set
             {
-                if (m_CapPosition[m_CapIdx] != value)
+                if (m_CaptionsPosition[m_CaptionIndex] != value)
                 {
-                    m_CapPosition[m_CapIdx] = value;
-                    CapsPosition = m_CapPosition;
+                    m_CaptionsPosition[m_CaptionIndex] = value;
+                    CaptionsPosition = m_CaptionsPosition;
                     drawGaugeBackground = true;
                     Refresh();
                 }
@@ -375,27 +338,28 @@ namespace AGaugeApp
         }
 
         [System.ComponentModel.Browsable(false)]
-        public Point[] CapsPosition
+        public Point[] CaptionsPosition
         {
             get
             {
-                return m_CapPosition;
+                return m_CaptionsPosition;
             }
             set
             {
-                m_CapPosition = value;
+                m_CaptionsPosition = value;
             }
         }
+
+        #endregion // << Gauge Captions >>
+
+        #region << Gauge Base >>
 
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("AGauge"),
         System.ComponentModel.Description("The center of the gauge (in the control's client area).")]
         public Point Center
         {
-            get
-            {
-                return m_Center;
-            }
+            get { return m_Center; }
             set
             {
                 if (m_Center != value)
@@ -409,55 +373,10 @@ namespace AGaugeApp
 
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("AGauge"),
-        System.ComponentModel.Description("The minimum value to show on the scale.")]
-        public Single MinValue
-        {
-            get
-            {
-                return m_MinValue;
-            }
-            set
-            {
-                if ((m_MinValue != value)
-                && (value < m_MaxValue))
-                {
-                    m_MinValue = value;
-                    drawGaugeBackground = true;
-                    Refresh();
-                }
-            }
-        }
-
-        [System.ComponentModel.Browsable(true),
-        System.ComponentModel.Category("AGauge"),
-        System.ComponentModel.Description("The maximum value to show on the scale.")]
-        public Single MaxValue
-        {
-            get
-            {
-                return m_MaxValue;
-            }
-            set
-            {
-                if ((m_MaxValue != value)
-                && (value > m_MinValue))
-                {
-                    m_MaxValue = value;
-                    drawGaugeBackground = true;
-                    Refresh();
-                }
-            }
-        }
-
-        [System.ComponentModel.Browsable(true),
-        System.ComponentModel.Category("AGauge"),
         System.ComponentModel.Description("The color of the base arc.")]
         public Color BaseArcColor
         {
-            get
-            {
-                return m_BaseArcColor;
-            }
+            get { return m_BaseArcColor; }
             set
             {
                 if (m_BaseArcColor != value)
@@ -474,10 +393,7 @@ namespace AGaugeApp
         System.ComponentModel.Description("The radius of the base arc.")]
         public Int32 BaseArcRadius
         {
-            get
-            {
-                return m_BaseArcRadius;
-            }
+            get { return m_BaseArcRadius; }
             set
             {
                 if (m_BaseArcRadius != value)
@@ -494,10 +410,7 @@ namespace AGaugeApp
         System.ComponentModel.Description("The start angle of the base arc.")]
         public Int32 BaseArcStart
         {
-            get
-            {
-                return m_BaseArcStart;
-            }
+            get { return m_BaseArcStart; }
             set
             {
                 if (m_BaseArcStart != value)
@@ -514,10 +427,7 @@ namespace AGaugeApp
         System.ComponentModel.Description("The sweep angle of the base arc.")]
         public Int32 BaseArcSweep
         {
-            get
-            {
-                return m_BaseArcSweep;
-            }
+            get { return m_BaseArcSweep; }
             set
             {
                 if (m_BaseArcSweep != value)
@@ -534,10 +444,7 @@ namespace AGaugeApp
         System.ComponentModel.Description("The width of the base arc.")]
         public Int32 BaseArcWidth
         {
-            get
-            {
-                return m_BaseArcWidth;
-            }
+            get { return m_BaseArcWidth; }
             set
             {
                 if (m_BaseArcWidth != value)
@@ -549,15 +456,50 @@ namespace AGaugeApp
             }
         }
 
+        #endregion
+
+        #region << Gauge Scale >>
+
+        [System.ComponentModel.Browsable(true),
+        System.ComponentModel.Category("AGauge"),
+        System.ComponentModel.Description("The minimum value to show on the scale.")]
+        public Single MinValue
+        {
+            get { return m_MinValue; }
+            set
+            {
+                if ((m_MinValue != value) && (value < m_MaxValue))
+                {
+                    m_MinValue = value;
+                    drawGaugeBackground = true;
+                    Refresh();
+                }
+            }
+        }
+
+        [System.ComponentModel.Browsable(true),
+        System.ComponentModel.Category("AGauge"),
+        System.ComponentModel.Description("The maximum value to show on the scale.")]
+        public Single MaxValue
+        {
+            get { return m_MaxValue; }
+            set
+            {
+                if ((m_MaxValue != value) && (value > m_MinValue))
+                {
+                    m_MaxValue = value;
+                    drawGaugeBackground = true;
+                    Refresh();
+                }
+            }
+        }
+
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("AGauge"),
         System.ComponentModel.Description("The color of the inter scale lines which are the middle scale lines for an uneven number of minor scale lines.")]
         public Color ScaleLinesInterColor
         {
-            get
-            {
-                return m_ScaleLinesInterColor;
-            }
+            get { return m_ScaleLinesInterColor; }
             set
             {
                 if (m_ScaleLinesInterColor != value)
@@ -574,10 +516,7 @@ namespace AGaugeApp
         System.ComponentModel.Description("The inner radius of the inter scale lines which are the middle scale lines for an uneven number of minor scale lines.")]
         public Int32 ScaleLinesInterInnerRadius
         {
-            get
-            {
-                return m_ScaleLinesInterInnerRadius;
-            }
+            get { return m_ScaleLinesInterInnerRadius; }
             set
             {
                 if (m_ScaleLinesInterInnerRadius != value)
@@ -594,10 +533,7 @@ namespace AGaugeApp
         System.ComponentModel.Description("The outer radius of the inter scale lines which are the middle scale lines for an uneven number of minor scale lines.")]
         public Int32 ScaleLinesInterOuterRadius
         {
-            get
-            {
-                return m_ScaleLinesInterOuterRadius;
-            }
+            get { return m_ScaleLinesInterOuterRadius; }
             set
             {
                 if (m_ScaleLinesInterOuterRadius != value)
@@ -614,10 +550,7 @@ namespace AGaugeApp
         System.ComponentModel.Description("The width of the inter scale lines which are the middle scale lines for an uneven number of minor scale lines.")]
         public Int32 ScaleLinesInterWidth
         {
-            get
-            {
-                return m_ScaleLinesInterWidth;
-            }
+            get { return m_ScaleLinesInterWidth; }
             set
             {
                 if (m_ScaleLinesInterWidth != value)
@@ -634,10 +567,7 @@ namespace AGaugeApp
         System.ComponentModel.Description("The number of minor scale lines.")]
         public Int32 ScaleLinesMinorNumOf
         {
-            get
-            {
-                return m_ScaleLinesMinorNumOf;
-            }
+            get { return m_ScaleLinesMinorNumOf; }
             set
             {
                 if (m_ScaleLinesMinorNumOf != value)
@@ -654,10 +584,7 @@ namespace AGaugeApp
         System.ComponentModel.Description("The color of the minor scale lines.")]
         public Color ScaleLinesMinorColor
         {
-            get
-            {
-                return m_ScaleLinesMinorColor;
-            }
+            get { return m_ScaleLinesMinorColor; }
             set
             {
                 if (m_ScaleLinesMinorColor != value)
@@ -674,10 +601,7 @@ namespace AGaugeApp
         System.ComponentModel.Description("The inner radius of the minor scale lines.")]
         public Int32 ScaleLinesMinorInnerRadius
         {
-            get
-            {
-                return m_ScaleLinesMinorInnerRadius;
-            }
+            get { return m_ScaleLinesMinorInnerRadius; }
             set
             {
                 if (m_ScaleLinesMinorInnerRadius != value)
@@ -694,10 +618,7 @@ namespace AGaugeApp
         System.ComponentModel.Description("The outer radius of the minor scale lines.")]
         public Int32 ScaleLinesMinorOuterRadius
         {
-            get
-            {
-                return m_ScaleLinesMinorOuterRadius;
-            }
+            get { return m_ScaleLinesMinorOuterRadius; }
             set
             {
                 if (m_ScaleLinesMinorOuterRadius != value)
@@ -714,10 +635,7 @@ namespace AGaugeApp
         System.ComponentModel.Description("The width of the minor scale lines.")]
         public Int32 ScaleLinesMinorWidth
         {
-            get
-            {
-                return m_ScaleLinesMinorWidth;
-            }
+            get { return m_ScaleLinesMinorWidth; }
             set
             {
                 if (m_ScaleLinesMinorWidth != value)
@@ -734,10 +652,7 @@ namespace AGaugeApp
         System.ComponentModel.Description("The step value of the major scale lines.")]
         public Single ScaleLinesMajorStepValue
         {
-            get
-            {
-                return m_ScaleLinesMajorStepValue;
-            }
+            get { return m_ScaleLinesMajorStepValue; }
             set
             {
                 if ((m_ScaleLinesMajorStepValue != value) && (value > 0))
@@ -748,15 +663,13 @@ namespace AGaugeApp
                 }
             }
         }
+
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("AGauge"),
         System.ComponentModel.Description("The color of the major scale lines.")]
         public Color ScaleLinesMajorColor
         {
-            get
-            {
-                return m_ScaleLinesMajorColor;
-            }
+            get { return m_ScaleLinesMajorColor; }
             set
             {
                 if (m_ScaleLinesMajorColor != value)
@@ -773,10 +686,7 @@ namespace AGaugeApp
         System.ComponentModel.Description("The inner radius of the major scale lines.")]
         public Int32 ScaleLinesMajorInnerRadius
         {
-            get
-            {
-                return m_ScaleLinesMajorInnerRadius;
-            }
+            get { return m_ScaleLinesMajorInnerRadius; }
             set
             {
                 if (m_ScaleLinesMajorInnerRadius != value)
@@ -793,10 +703,7 @@ namespace AGaugeApp
         System.ComponentModel.Description("The outer radius of the major scale lines.")]
         public Int32 ScaleLinesMajorOuterRadius
         {
-            get
-            {
-                return m_ScaleLinesMajorOuterRadius;
-            }
+            get { return m_ScaleLinesMajorOuterRadius; }
             set
             {
                 if (m_ScaleLinesMajorOuterRadius != value)
@@ -813,10 +720,7 @@ namespace AGaugeApp
         System.ComponentModel.Description("The width of the major scale lines.")]
         public Int32 ScaleLinesMajorWidth
         {
-            get
-            {
-                return m_ScaleLinesMajorWidth;
-            }
+            get { return m_ScaleLinesMajorWidth; }
             set
             {
                 if (m_ScaleLinesMajorWidth != value)
@@ -827,6 +731,10 @@ namespace AGaugeApp
                 }
             }
         }
+
+        #endregion
+
+        #region << (ToDo): Gauge Range >>
 
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("AGauge"),
@@ -1058,6 +966,10 @@ namespace AGaugeApp
             }
         }
 
+        #endregion
+
+        #region << (ToDo): Gauge Scale Numbers >>
+
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("AGauge"),
         System.ComponentModel.Description("The radius of the scale numbers.")]
@@ -1178,6 +1090,10 @@ namespace AGaugeApp
             }
         }
 
+        #endregion
+        
+        #region << (ToDo) Gauge Needle >>
+
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("AGauge"),
         System.ComponentModel.Description("The type of the needle, currently only type 0 and 1 are supported. Type 0 looks nicers but if you experience performance problems you might consider using type 1.")]
@@ -1221,7 +1137,7 @@ namespace AGaugeApp
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("AGauge"),
         System.ComponentModel.Description("The first color of the needle.")]
-        public NeedleColorEnum NeedleColor1
+        public NeedleColor NeedleColor1
         {
             get
             {
@@ -1278,8 +1194,10 @@ namespace AGaugeApp
             }
         }
         #endregion
+        
+        #endregion
 
-#region helper
+        #region helper
         private void FindFontBounds()
         {
             //find upper and lower bounds for numeric characters
@@ -1336,9 +1254,9 @@ namespace AGaugeApp
                 c1--;
             }
         }
-#endregion
+        #endregion
 
-#region base member overrides
+        #region base member overrides
         protected override void OnPaintBackground(PaintEventArgs pevent)
         {
         }
@@ -1349,7 +1267,7 @@ namespace AGaugeApp
             {
                 return;
             }
-            
+
             if (drawGaugeBackground)
             {
                 drawGaugeBackground = false;
@@ -1360,7 +1278,7 @@ namespace AGaugeApp
                 Graphics ggr = Graphics.FromImage(gaugeBitmap);
                 ggr.FillRectangle(new SolidBrush(BackColor), ClientRectangle);
 
-                if (BackgroundImage!=null)
+                if (BackgroundImage != null)
                 {
                     switch (BackgroundImageLayout)
                     {
@@ -1406,7 +1324,7 @@ namespace AGaugeApp
                 GraphicsPath gp = new GraphicsPath();
                 Single rangeStartAngle;
                 Single rangeSweepAngle;
-                for (Int32 counter= 0; counter<NUMOFRANGES; counter++)
+                for (Int32 counter = 0; counter < NUMOFRANGES; counter++)
                 {
                     if (m_RangeEndValue[counter] > m_RangeStartValue[counter]
                     && m_RangeEnabled[counter])
@@ -1428,11 +1346,11 @@ namespace AGaugeApp
                 {
                     ggr.DrawArc(new Pen(m_BaseArcColor, m_BaseArcWidth), new Rectangle(m_Center.X - m_BaseArcRadius, m_Center.Y - m_BaseArcRadius, 2 * m_BaseArcRadius, 2 * m_BaseArcRadius), m_BaseArcStart, m_BaseArcSweep);
                 }
-                
+
                 String valueText = "";
                 SizeF boundingBox;
-                Single  countValue= 0;
-                Int32 counter1  = 0;
+                Single countValue = 0;
+                Int32 counter1 = 0;
                 while (countValue <= (m_MaxValue - m_MinValue))
                 {
                     valueText = (m_MinValue + countValue).ToString(m_ScaleNumbersFormat);
@@ -1447,8 +1365,8 @@ namespace AGaugeApp
                     ggr.SetClip(gp);
 
                     ggr.DrawLine(new Pen(m_ScaleLinesMajorColor, m_ScaleLinesMajorWidth),
-                    (Single)(Center.X), 
-                    (Single)(Center.Y), 
+                    (Single)(Center.X),
+                    (Single)(Center.Y),
                     (Single)(Center.X + 2 * m_ScaleLinesMajorOuterRadius * Math.Cos((m_BaseArcStart + countValue * m_BaseArcSweep / (m_MaxValue - m_MinValue)) * Math.PI / 180.0)),
                     (Single)(Center.Y + 2 * m_ScaleLinesMajorOuterRadius * Math.Sin((m_BaseArcStart + countValue * m_BaseArcSweep / (m_MaxValue - m_MinValue)) * Math.PI / 180.0)));
 
@@ -1461,7 +1379,7 @@ namespace AGaugeApp
 
                     if (countValue < (m_MaxValue - m_MinValue))
                     {
-                        for (Int32 counter2= 1; counter2<=m_ScaleLinesMinorNumOf; counter2++)
+                        for (Int32 counter2 = 1; counter2 <= m_ScaleLinesMinorNumOf; counter2++)
                         {
                             if (((m_ScaleLinesMinorNumOf % 2) == 1) && ((Int32)(m_ScaleLinesMinorNumOf / 2) + 1 == counter2))
                             {
@@ -1472,10 +1390,10 @@ namespace AGaugeApp
                                 gp.Reverse();
                                 ggr.SetClip(gp);
 
-                                ggr.DrawLine(new Pen(m_ScaleLinesInterColor, m_ScaleLinesInterWidth), 
-                                (Single)(Center.X), 
-                                (Single)(Center.Y), 
-                                (Single)(Center.X + 2 * m_ScaleLinesInterOuterRadius * Math.Cos((m_BaseArcStart + countValue * m_BaseArcSweep / (m_MaxValue - m_MinValue) + counter2 * m_BaseArcSweep / (((Single)((m_MaxValue - m_MinValue) / m_ScaleLinesMajorStepValue)) * (m_ScaleLinesMinorNumOf + 1))) * Math.PI / 180.0)), 
+                                ggr.DrawLine(new Pen(m_ScaleLinesInterColor, m_ScaleLinesInterWidth),
+                                (Single)(Center.X),
+                                (Single)(Center.Y),
+                                (Single)(Center.X + 2 * m_ScaleLinesInterOuterRadius * Math.Cos((m_BaseArcStart + countValue * m_BaseArcSweep / (m_MaxValue - m_MinValue) + counter2 * m_BaseArcSweep / (((Single)((m_MaxValue - m_MinValue) / m_ScaleLinesMajorStepValue)) * (m_ScaleLinesMinorNumOf + 1))) * Math.PI / 180.0)),
                                 (Single)(Center.Y + 2 * m_ScaleLinesInterOuterRadius * Math.Sin((m_BaseArcStart + countValue * m_BaseArcSweep / (m_MaxValue - m_MinValue) + counter2 * m_BaseArcSweep / (((Single)((m_MaxValue - m_MinValue) / m_ScaleLinesMajorStepValue)) * (m_ScaleLinesMinorNumOf + 1))) * Math.PI / 180.0)));
 
                                 gp.Reset();
@@ -1487,10 +1405,10 @@ namespace AGaugeApp
                             }
                             else
                             {
-                                ggr.DrawLine(new Pen(m_ScaleLinesMinorColor, m_ScaleLinesMinorWidth), 
-                                (Single)(Center.X), 
-                                (Single)(Center.Y), 
-                                (Single)(Center.X + 2 * m_ScaleLinesMinorOuterRadius * Math.Cos((m_BaseArcStart + countValue * m_BaseArcSweep / (m_MaxValue - m_MinValue) + counter2 * m_BaseArcSweep / (((Single)((m_MaxValue - m_MinValue) / m_ScaleLinesMajorStepValue)) * (m_ScaleLinesMinorNumOf + 1))) * Math.PI / 180.0)), 
+                                ggr.DrawLine(new Pen(m_ScaleLinesMinorColor, m_ScaleLinesMinorWidth),
+                                (Single)(Center.X),
+                                (Single)(Center.Y),
+                                (Single)(Center.X + 2 * m_ScaleLinesMinorOuterRadius * Math.Cos((m_BaseArcStart + countValue * m_BaseArcSweep / (m_MaxValue - m_MinValue) + counter2 * m_BaseArcSweep / (((Single)((m_MaxValue - m_MinValue) / m_ScaleLinesMajorStepValue)) * (m_ScaleLinesMinorNumOf + 1))) * Math.PI / 180.0)),
                                 (Single)(Center.Y + 2 * m_ScaleLinesMinorOuterRadius * Math.Sin((m_BaseArcStart + countValue * m_BaseArcSweep / (m_MaxValue - m_MinValue) + counter2 * m_BaseArcSweep / (((Single)((m_MaxValue - m_MinValue) / m_ScaleLinesMajorStepValue)) * (m_ScaleLinesMinorNumOf + 1))) * Math.PI / 180.0)));
                             }
                         }
@@ -1503,9 +1421,9 @@ namespace AGaugeApp
                         ggr.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
                         ggr.RotateTransform(90.0F + m_BaseArcStart + countValue * m_BaseArcSweep / (m_MaxValue - m_MinValue));
                     }
-                    
+
                     ggr.TranslateTransform((Single)(Center.X + m_ScaleNumbersRadius * Math.Cos((m_BaseArcStart + countValue * m_BaseArcSweep / (m_MaxValue - m_MinValue)) * Math.PI / 180.0f)),
-                                           (Single)(Center.Y + m_ScaleNumbersRadius * Math.Sin((m_BaseArcStart + countValue * m_BaseArcSweep / (m_MaxValue - m_MinValue)) * Math.PI / 180.0f)), 
+                                           (Single)(Center.Y + m_ScaleNumbersRadius * Math.Sin((m_BaseArcStart + countValue * m_BaseArcSweep / (m_MaxValue - m_MinValue)) * Math.PI / 180.0f)),
                                            System.Drawing.Drawing2D.MatrixOrder.Append);
 
 
@@ -1515,7 +1433,7 @@ namespace AGaugeApp
                     }
 
                     countValue += m_ScaleLinesMajorStepValue;
-                    counter1 ++;
+                    counter1++;
                 }
 
                 ggr.ResetTransform();
@@ -1523,14 +1441,14 @@ namespace AGaugeApp
 
                 if (m_ScaleNumbersRotation != 0)
                 {
-                   ggr.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SystemDefault;
+                    ggr.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SystemDefault;
                 }
-                
-                for (Int32 counter= 0; counter<NUMOFCAPS; counter++)
+
+                for (Int32 counter = 0; counter < NUMOFCAPS; counter++)
                 {
-                    if (m_CapText[counter] != "")
+                    if (m_CaptionsText[counter] != "")
                     {
-                       ggr.DrawString(m_CapText[counter], Font, new SolidBrush(m_CapColor[counter]), m_CapPosition[counter].X, m_CapPosition[counter].Y, StringFormat.GenericTypographic);
+                        ggr.DrawString(m_CaptionsText[counter], Font, new SolidBrush(m_CaptionColor[counter]), m_CaptionsPosition[counter].X, m_CaptionsPosition[counter].Y, StringFormat.GenericTypographic);
                     }
                 }
             }
@@ -1540,12 +1458,12 @@ namespace AGaugeApp
             pe.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
             Single brushAngle = (Int32)(m_BaseArcStart + (m_value - m_MinValue) * m_BaseArcSweep / (m_MaxValue - m_MinValue)) % 360;
-            Double needleAngle= brushAngle * Math.PI / 180;
-            
-            switch(m_NeedleType)
+            Double needleAngle = brushAngle * Math.PI / 180;
+
+            switch (m_NeedleType)
             {
                 case 0:
-                    PointF[] points=new PointF[3];
+                    PointF[] points = new PointF[3];
                     Brush brush1 = Brushes.White;
                     Brush brush2 = Brushes.White;
                     Brush brush3 = Brushes.White;
@@ -1556,51 +1474,51 @@ namespace AGaugeApp
                     Int32 subcol2 = (Int32)(((brushAngle + 135) % 180) * 100 / 180);
 
                     pe.Graphics.FillEllipse(new SolidBrush(m_NeedleColor2), Center.X - m_NeedleWidth * 3, Center.Y - m_NeedleWidth * 3, m_NeedleWidth * 6, m_NeedleWidth * 6);
-                    switch(m_NeedleColor1)
+                    switch (m_NeedleColor1)
                     {
-                        case NeedleColorEnum.Gray:
+                        case NeedleColor.Gray:
                             brush1 = new SolidBrush(Color.FromArgb(80 + subcol, 80 + subcol, 80 + subcol));
                             brush2 = new SolidBrush(Color.FromArgb(180 - subcol, 180 - subcol, 180 - subcol));
                             brush3 = new SolidBrush(Color.FromArgb(80 + subcol2, 80 + subcol2, 80 + subcol2));
                             brush4 = new SolidBrush(Color.FromArgb(180 - subcol2, 180 - subcol2, 180 - subcol2));
                             pe.Graphics.DrawEllipse(Pens.Gray, Center.X - m_NeedleWidth * 3, Center.Y - m_NeedleWidth * 3, m_NeedleWidth * 6, m_NeedleWidth * 6);
                             break;
-                        case NeedleColorEnum.Red:
+                        case NeedleColor.Red:
                             brush1 = new SolidBrush(Color.FromArgb(145 + subcol, subcol, subcol));
                             brush2 = new SolidBrush(Color.FromArgb(245 - subcol, 100 - subcol, 100 - subcol));
                             brush3 = new SolidBrush(Color.FromArgb(145 + subcol2, subcol2, subcol2));
                             brush4 = new SolidBrush(Color.FromArgb(245 - subcol2, 100 - subcol2, 100 - subcol2));
                             pe.Graphics.DrawEllipse(Pens.Red, Center.X - m_NeedleWidth * 3, Center.Y - m_NeedleWidth * 3, m_NeedleWidth * 6, m_NeedleWidth * 6);
                             break;
-                        case NeedleColorEnum.Green:
+                        case NeedleColor.Green:
                             brush1 = new SolidBrush(Color.FromArgb(subcol, 145 + subcol, subcol));
                             brush2 = new SolidBrush(Color.FromArgb(100 - subcol, 245 - subcol, 100 - subcol));
                             brush3 = new SolidBrush(Color.FromArgb(subcol2, 145 + subcol2, subcol2));
                             brush4 = new SolidBrush(Color.FromArgb(100 - subcol2, 245 - subcol2, 100 - subcol2));
                             pe.Graphics.DrawEllipse(Pens.Green, Center.X - m_NeedleWidth * 3, Center.Y - m_NeedleWidth * 3, m_NeedleWidth * 6, m_NeedleWidth * 6);
                             break;
-                        case NeedleColorEnum.Blue:
+                        case NeedleColor.Blue:
                             brush1 = new SolidBrush(Color.FromArgb(subcol, subcol, 145 + subcol));
                             brush2 = new SolidBrush(Color.FromArgb(100 - subcol, 100 - subcol, 245 - subcol));
                             brush3 = new SolidBrush(Color.FromArgb(subcol2, subcol2, 145 + subcol2));
                             brush4 = new SolidBrush(Color.FromArgb(100 - subcol2, 100 - subcol2, 245 - subcol2));
                             pe.Graphics.DrawEllipse(Pens.Blue, Center.X - m_NeedleWidth * 3, Center.Y - m_NeedleWidth * 3, m_NeedleWidth * 6, m_NeedleWidth * 6);
                             break;
-                        case NeedleColorEnum.Magenta:
+                        case NeedleColor.Magenta:
                             brush1 = new SolidBrush(Color.FromArgb(subcol, 145 + subcol, 145 + subcol));
                             brush2 = new SolidBrush(Color.FromArgb(100 - subcol, 245 - subcol, 245 - subcol));
                             brush3 = new SolidBrush(Color.FromArgb(subcol2, 145 + subcol2, 145 + subcol2));
                             brush4 = new SolidBrush(Color.FromArgb(100 - subcol2, 245 - subcol2, 245 - subcol2));
                             pe.Graphics.DrawEllipse(Pens.Magenta, Center.X - m_NeedleWidth * 3, Center.Y - m_NeedleWidth * 3, m_NeedleWidth * 6, m_NeedleWidth * 6);
                             break;
-                        case NeedleColorEnum.Violet:
+                        case NeedleColor.Violet:
                             brush1 = new SolidBrush(Color.FromArgb(145 + subcol, subcol, 145 + subcol));
                             brush2 = new SolidBrush(Color.FromArgb(245 - subcol, 100 - subcol, 245 - subcol));
                             brush3 = new SolidBrush(Color.FromArgb(145 + subcol2, subcol2, 145 + subcol2));
                             brush4 = new SolidBrush(Color.FromArgb(245 - subcol2, 100 - subcol2, 245 - subcol2));
                             pe.Graphics.DrawEllipse(Pens.Violet, Center.X - m_NeedleWidth * 3, Center.Y - m_NeedleWidth * 3, m_NeedleWidth * 6, m_NeedleWidth * 6);
                             break;
-                        case NeedleColorEnum.Yellow:
+                        case NeedleColor.Yellow:
                             brush1 = new SolidBrush(Color.FromArgb(145 + subcol, 145 + subcol, subcol));
                             brush2 = new SolidBrush(Color.FromArgb(245 - subcol, 245 - subcol, 100 - subcol));
                             brush3 = new SolidBrush(Color.FromArgb(145 + subcol2, 145 + subcol2, subcol2));
@@ -1620,9 +1538,9 @@ namespace AGaugeApp
                     {
                         brush4 = brush3;
                     }
-                   
+
                     points[0].X = (Single)(Center.X + m_NeedleRadius * Math.Cos(needleAngle));
-                    points[0].Y =(Single)( Center.Y + m_NeedleRadius * Math.Sin(needleAngle));
+                    points[0].Y = (Single)(Center.Y + m_NeedleRadius * Math.Sin(needleAngle));
                     points[1].X = (Single)(Center.X - m_NeedleRadius / 20 * Math.Cos(needleAngle));
                     points[1].Y = (Single)(Center.Y - m_NeedleRadius / 20 * Math.Sin(needleAngle));
                     points[2].X = (Single)(Center.X - m_NeedleRadius / 5 * Math.Cos(needleAngle) + m_NeedleWidth * 2 * Math.Cos(needleAngle + Math.PI / 2));
@@ -1650,40 +1568,40 @@ namespace AGaugeApp
                     pe.Graphics.DrawLine(new Pen(m_NeedleColor2), Center.X, Center.Y, points[1].X, points[1].Y);
                     break;
                 case 1:
-                    Point startPoint=new Point((Int32)(Center.X - m_NeedleRadius / 8 * Math.Cos(needleAngle)),
+                    Point startPoint = new Point((Int32)(Center.X - m_NeedleRadius / 8 * Math.Cos(needleAngle)),
                                                (Int32)(Center.Y - m_NeedleRadius / 8 * Math.Sin(needleAngle)));
-                    Point endPoint=new Point((Int32)(Center.X + m_NeedleRadius * Math.Cos(needleAngle)),
+                    Point endPoint = new Point((Int32)(Center.X + m_NeedleRadius * Math.Cos(needleAngle)),
                                              (Int32)(Center.Y + m_NeedleRadius * Math.Sin(needleAngle)));
 
                     pe.Graphics.FillEllipse(new SolidBrush(m_NeedleColor2), Center.X - m_NeedleWidth * 3, Center.Y - m_NeedleWidth * 3, m_NeedleWidth * 6, m_NeedleWidth * 6);
 
-                    switch(m_NeedleColor1)
+                    switch (m_NeedleColor1)
                     {
-                        case NeedleColorEnum.Gray:
+                        case NeedleColor.Gray:
                             pe.Graphics.DrawLine(new Pen(Color.DarkGray, m_NeedleWidth), Center.X, Center.Y, endPoint.X, endPoint.Y);
                             pe.Graphics.DrawLine(new Pen(Color.DarkGray, m_NeedleWidth), Center.X, Center.Y, startPoint.X, startPoint.Y);
                             break;
-                        case NeedleColorEnum.Red:
+                        case NeedleColor.Red:
                             pe.Graphics.DrawLine(new Pen(Color.Red, m_NeedleWidth), Center.X, Center.Y, endPoint.X, endPoint.Y);
                             pe.Graphics.DrawLine(new Pen(Color.Red, m_NeedleWidth), Center.X, Center.Y, startPoint.X, startPoint.Y);
                             break;
-                        case NeedleColorEnum.Green:
+                        case NeedleColor.Green:
                             pe.Graphics.DrawLine(new Pen(Color.Green, m_NeedleWidth), Center.X, Center.Y, endPoint.X, endPoint.Y);
                             pe.Graphics.DrawLine(new Pen(Color.Green, m_NeedleWidth), Center.X, Center.Y, startPoint.X, startPoint.Y);
                             break;
-                        case NeedleColorEnum.Blue:
+                        case NeedleColor.Blue:
                             pe.Graphics.DrawLine(new Pen(Color.Blue, m_NeedleWidth), Center.X, Center.Y, endPoint.X, endPoint.Y);
                             pe.Graphics.DrawLine(new Pen(Color.Blue, m_NeedleWidth), Center.X, Center.Y, startPoint.X, startPoint.Y);
                             break;
-                        case NeedleColorEnum.Magenta:
+                        case NeedleColor.Magenta:
                             pe.Graphics.DrawLine(new Pen(Color.Magenta, m_NeedleWidth), Center.X, Center.Y, endPoint.X, endPoint.Y);
                             pe.Graphics.DrawLine(new Pen(Color.Magenta, m_NeedleWidth), Center.X, Center.Y, startPoint.X, startPoint.Y);
                             break;
-                        case NeedleColorEnum.Violet:
+                        case NeedleColor.Violet:
                             pe.Graphics.DrawLine(new Pen(Color.Violet, m_NeedleWidth), Center.X, Center.Y, endPoint.X, endPoint.Y);
                             pe.Graphics.DrawLine(new Pen(Color.Violet, m_NeedleWidth), Center.X, Center.Y, startPoint.X, startPoint.Y);
                             break;
-                        case NeedleColorEnum.Yellow:
+                        case NeedleColor.Yellow:
                             pe.Graphics.DrawLine(new Pen(Color.Yellow, m_NeedleWidth), Center.X, Center.Y, endPoint.X, endPoint.Y);
                             pe.Graphics.DrawLine(new Pen(Color.Yellow, m_NeedleWidth), Center.X, Center.Y, startPoint.X, startPoint.Y);
                             break;
@@ -1697,7 +1615,14 @@ namespace AGaugeApp
             drawGaugeBackground = true;
             Refresh();
         }
-#endregion
+        #endregion
 
     }
+
+    /// <summary>
+    /// <para>AGauge - Copyright (C) 2007 A.J.Bauer</para>
+    /// <link>http://www.codeproject.com/Articles/17559/A-fast-and-performing-gauge</link>
+    /// </summary>
+    [System.Runtime.CompilerServices.CompilerGenerated]
+    class NamespaceDoc { } //Namespace Documentation
 }
