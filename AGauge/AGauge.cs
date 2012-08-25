@@ -1084,7 +1084,7 @@ namespace AGauge
 
         #endregion
 
-        #region helper
+        #region Helper
         private void FindFontBounds()
         {
             //find upper and lower bounds for numeric characters
