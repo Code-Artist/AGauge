@@ -26,7 +26,7 @@ using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.Diagnostics;
 
-namespace AGaugeApp
+namespace AGauge
 {
     [ToolboxBitmapAttribute(typeof(AGauge), "AGauge.bmp"),
     DefaultEvent("ValueInRangeChanged"),

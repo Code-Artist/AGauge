@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.aGauge1 = new AGaugeApp.AGauge();
+            this.aGauge1 = new AGauge.AGauge();
             this.SuspendLayout();
             // 
             // aGauge1
@@ -64,7 +64,7 @@
             this.aGauge1.MaxValue = 400F;
             this.aGauge1.MinValue = 0F;
             this.aGauge1.Name = "aGauge1";
-            this.aGauge1.NeedleColor1 = AGaugeApp.AGaugeNeedleColor.Gray;
+            this.aGauge1.NeedleColor1 = AGauge.AGaugeNeedleColor.Gray;
             this.aGauge1.NeedleColor2 = System.Drawing.Color.DimGray;
             this.aGauge1.NeedleRadius = 80;
             this.aGauge1.NeedleType = 0;
@@ -151,7 +151,7 @@
 
         #endregion
 
-        private AGaugeApp.AGauge aGauge1;
+        private AGauge.AGauge aGauge1;
 
     }
 }

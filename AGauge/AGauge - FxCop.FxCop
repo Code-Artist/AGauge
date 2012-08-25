@@ -63,40 +63,32 @@
         <Types>
          <Type Name="AGauge">
           <Members>
-           <Member Name="#.ctor()">
-            <Messages>
-             <Message TypeName="DoNotInitializeUnnecessarily" Category="Microsoft.Performance" CheckId="CA1805" Created="2012-08-24 14:07:06Z">
-              <Issue>
-               <Item>'AGauge.AGauge()'</Item>
-               <Item>'AGauge.m_NeedleType'</Item>
-               <Item>'int'</Item>
-               <Item>0</Item>
-              </Issue>
-              <Issue>
-               <Item>'AGauge.AGauge()'</Item>
-               <Item>'AGauge.m_ScaleNumbersRotation'</Item>
-               <Item>'int'</Item>
-               <Item>0</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
            <Member Name="#AllowDrop">
             <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2012-08-24 14:07:06Z" FixCategory="DependsOnFix">
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Status="Excluded" Created="2012-08-24 14:07:06Z" FixCategory="DependsOnFix">
               <Issue>
                <Item>'AGauge.AllowDrop'</Item>
               </Issue>
+              <Notes>
+               <User Name="Admin">
+                <Note Id="0" />
+               </User>
+              </Notes>
              </Message>
             </Messages>
             <Accessors>
              <Accessor Name="#set_AllowDrop(System.Boolean)">
               <Messages>
-               <Message Id="value" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2012-08-24 14:07:06Z" FixCategory="DependsOnFix">
+               <Message Id="value" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Status="Excluded" Created="2012-08-24 14:07:06Z" FixCategory="DependsOnFix">
                 <Issue>
                  <Item>'value'</Item>
                  <Item>'AGauge.AllowDrop.set(bool)'</Item>
                 </Issue>
+                <Notes>
+                 <User Name="Admin">
+                  <Note Id="1" />
+                 </User>
+                </Notes>
                </Message>
               </Messages>
              </Accessor>
@@ -104,94 +96,88 @@
            </Member>
            <Member Name="#AutoSize">
             <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2012-08-24 14:07:06Z" FixCategory="DependsOnFix">
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Status="Excluded" Created="2012-08-24 14:07:06Z" FixCategory="DependsOnFix">
               <Issue>
                <Item>'AGauge.AutoSize'</Item>
               </Issue>
+              <Notes>
+               <User Name="Admin">
+                <Note Id="0" />
+               </User>
+              </Notes>
              </Message>
             </Messages>
             <Accessors>
              <Accessor Name="#set_AutoSize(System.Boolean)">
               <Messages>
-               <Message Id="value" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2012-08-24 14:07:06Z" FixCategory="DependsOnFix">
+               <Message Id="value" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Status="Excluded" Created="2012-08-24 14:07:06Z" FixCategory="DependsOnFix">
                 <Issue>
                  <Item>'value'</Item>
                  <Item>'AGauge.AutoSize.set(bool)'</Item>
                 </Issue>
+                <Notes>
+                 <User Name="Admin">
+                  <Note Id="1" />
+                 </User>
+                </Notes>
                </Message>
               </Messages>
              </Accessor>
             </Accessors>
            </Member>
-           <Member Name="#Cap_Idx">
+           <Member Name="#CaptionColors">
             <Messages>
-             <Message Id="Idx" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Created="2012-08-24 14:07:06Z">
-              <Issue Name="Member">
-               <Item>Idx</Item>
-               <Item>'AGauge.Cap_Idx'</Item>
-              </Issue>
-             </Message>
-             <Message TypeName="IdentifiersShouldNotContainUnderscores" Category="Microsoft.Naming" CheckId="CA1707" Created="2012-08-24 14:07:06Z">
-              <Issue Name="Member">
-               <Item>'AGauge.Cap_Idx'</Item>
+             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Created="2012-08-24 15:49:49Z">
+              <Issue>
+               <Item>'AGauge.CaptionColors'</Item>
               </Issue>
              </Message>
             </Messages>
            </Member>
-           <Member Name="#CapColors">
+           <Member Name="#CaptionsPosition">
             <Messages>
-             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Created="2012-08-24 14:07:06Z">
+             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Created="2012-08-24 15:49:49Z">
               <Issue>
-               <Item>'AGauge.CapColors'</Item>
+               <Item>'AGauge.CaptionsPosition'</Item>
               </Issue>
              </Message>
             </Messages>
            </Member>
-           <Member Name="#CapsPosition">
+           <Member Name="#CaptionsText">
             <Messages>
-             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Created="2012-08-24 14:07:06Z">
+             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Created="2012-08-24 15:49:49Z">
               <Issue>
-               <Item>'AGauge.CapsPosition'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#CapsText">
-            <Messages>
-             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Created="2012-08-24 14:07:06Z">
-              <Issue>
-               <Item>'AGauge.CapsText'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#Dispose(System.Boolean)">
-            <Messages>
-             <Message Id="gaugeBitmap" TypeName="DisposableFieldsShouldBeDisposed" Category="Microsoft.Usage" CheckId="CA2213" Created="2012-08-24 14:07:06Z">
-              <Issue>
-               <Item>'AGauge'</Item>
-               <Item>'AGauge.gaugeBitmap'</Item>
-               <Item>'Bitmap'</Item>
+               <Item>'AGauge.CaptionsText'</Item>
               </Issue>
              </Message>
             </Messages>
            </Member>
            <Member Name="#ForeColor">
             <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2012-08-24 14:07:06Z" FixCategory="DependsOnFix">
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Status="Excluded" Created="2012-08-24 14:07:06Z" FixCategory="DependsOnFix">
               <Issue>
                <Item>'AGauge.ForeColor'</Item>
               </Issue>
+              <Notes>
+               <User Name="Admin">
+                <Note Id="0" />
+               </User>
+              </Notes>
              </Message>
             </Messages>
             <Accessors>
              <Accessor Name="#set_ForeColor(System.Boolean)">
               <Messages>
-               <Message Id="value" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2012-08-24 14:07:06Z" FixCategory="DependsOnFix">
+               <Message Id="value" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Status="Excluded" Created="2012-08-24 14:07:06Z" FixCategory="DependsOnFix">
                 <Issue>
                  <Item>'value'</Item>
                  <Item>'AGauge.ForeColor.set(bool)'</Item>
                 </Issue>
+                <Notes>
+                 <User Name="Admin">
+                  <Note Id="1" />
+                 </User>
+                </Notes>
                </Message>
               </Messages>
              </Accessor>
@@ -199,20 +185,30 @@
            </Member>
            <Member Name="#ImeMode">
             <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2012-08-24 14:07:06Z" FixCategory="DependsOnFix">
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Status="Excluded" Created="2012-08-24 14:07:06Z" FixCategory="DependsOnFix">
               <Issue>
                <Item>'AGauge.ImeMode'</Item>
               </Issue>
+              <Notes>
+               <User Name="Admin">
+                <Note Id="0" />
+               </User>
+              </Notes>
              </Message>
             </Messages>
             <Accessors>
              <Accessor Name="#set_ImeMode(System.Boolean)">
               <Messages>
-               <Message Id="value" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2012-08-24 14:07:06Z" FixCategory="DependsOnFix">
+               <Message Id="value" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Status="Excluded" Created="2012-08-24 14:07:06Z" FixCategory="DependsOnFix">
                 <Issue>
                  <Item>'value'</Item>
                  <Item>'AGauge.ImeMode.set(bool)'</Item>
                 </Issue>
+                <Notes>
+                 <User Name="Admin">
+                  <Note Id="1" />
+                 </User>
+                </Notes>
                </Message>
               </Messages>
              </Accessor>
@@ -220,41 +216,17 @@
            </Member>
            <Member Name="#OnPaint(System.Windows.Forms.PaintEventArgs)">
             <Messages>
-             <Message Id="0#" TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725" Created="2012-08-24 14:07:06Z">
-              <Issue>
-               <Item>'AGauge.OnPaint(PaintEventArgs)'</Item>
-               <Item>'pe'</Item>
-               <Item>'e'</Item>
-               <Item>'Control.OnPaint(PaintEventArgs)'</Item>
-              </Issue>
-             </Message>
-             <Message Id="System.Single.ToString(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2012-08-24 14:07:06Z">
+             <Message Id="System.Single.ToString(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Status="Excluded" Created="2012-08-24 14:07:06Z">
               <Issue>
                <Item>'float.ToString(string)'</Item>
                <Item>'AGauge.OnPaint(PaintEventArgs)'</Item>
                <Item>'float.ToString(string, IFormatProvider)'</Item>
               </Issue>
-             </Message>
-             <Message TypeName="TestForEmptyStringsUsingStringLength" Category="Microsoft.Performance" CheckId="CA1820" Created="2012-08-24 14:07:06Z">
-              <Issue Name="IsNullOrEmpty">
-               <Item>'string.operator !=(string, string)'</Item>
-               <Item>'AGauge.OnPaint(PaintEventArgs)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#Range_Idx">
-            <Messages>
-             <Message Id="Idx" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Created="2012-08-24 14:07:06Z">
-              <Issue Name="Member">
-               <Item>Idx</Item>
-               <Item>'AGauge.Range_Idx'</Item>
-              </Issue>
-             </Message>
-             <Message TypeName="IdentifiersShouldNotContainUnderscores" Category="Microsoft.Naming" CheckId="CA1707" Created="2012-08-24 14:07:06Z">
-              <Issue Name="Member">
-               <Item>'AGauge.Range_Idx'</Item>
-              </Issue>
+              <Notes>
+               <User Name="Admin">
+                <Note Id="2" />
+               </User>
+              </Notes>
              </Message>
             </Messages>
            </Member>
@@ -312,35 +284,7 @@
              </Message>
             </Messages>
            </Member>
-           <Member Name="#ScaleLinesMinorNumOf">
-            <Messages>
-             <Message Id="Num" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Created="2012-08-24 14:07:06Z">
-              <Issue Name="Member">
-               <Item>Num</Item>
-               <Item>'AGauge.ScaleLinesMinorNumOf'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
           </Members>
-         </Type>
-         <Type Name="AGauge+NeedleColor">
-          <Messages>
-           <Message TypeName="NestedTypesShouldNotBeVisible" Category="Microsoft.Design" CheckId="CA1034" Created="2012-08-24 14:52:28Z">
-            <Issue>
-             <Item>'AGauge.NeedleColor'</Item>
-            </Issue>
-           </Message>
-          </Messages>
-         </Type>
-         <Type Name="AGauge+ValueInRangeChangedEventArgs">
-          <Messages>
-           <Message TypeName="NestedTypesShouldNotBeVisible" Category="Microsoft.Design" CheckId="CA1034" Created="2012-08-24 14:07:06Z">
-            <Issue>
-             <Item>'AGauge.ValueInRangeChangedEventArgs'</Item>
-            </Issue>
-           </Message>
-          </Messages>
          </Type>
         </Types>
        </Namespace>
@@ -349,33 +293,22 @@
     </Modules>
    </Target>
   </Targets>
+  <Notes>
+   <User Name="Admin">
+    <Note Id="0" Modified="2012-08-24 15:52:43Z">Overrides inherited properties.</Note>
+    <Note Id="1" Modified="2012-08-24 16:04:02Z">Overrides inherited properties.</Note>
+    <Note Id="2" Modified="2012-08-24 16:05:36Z">String format controlled by ScaleNumbersFormat</Note>
+   </User>
+  </Notes>
   <Rules>
    <Rule TypeName="AssembliesShouldHaveValidStrongNames" Category="Microsoft.Design" CheckId="CA2210">
     <Resolution Name="NoStrongName">Sign {0} with a strong name key.</Resolution>
-   </Rule>
-   <Rule TypeName="DisposableFieldsShouldBeDisposed" Category="Microsoft.Usage" CheckId="CA2213">
-    <Resolution Name="Default">{0} contains field {1} that is of IDisposable type: {2}. Change the Dispose method on {0} to call Dispose or Close on this field.</Resolution>
-   </Rule>
-   <Rule TypeName="DoNotInitializeUnnecessarily" Category="Microsoft.Performance" CheckId="CA1805">
-    <Resolution Name="Default">{0} initializes field {1} of type {2} to {3}. Remove this initialization because it will be done automatically by the runtime.</Resolution>
-   </Rule>
-   <Rule TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704">
-    <Resolution Name="Member">Correct the spelling of '{0}' in member name {1} or remove it entirely if it represents any sort of Hungarian notation.</Resolution>
-   </Rule>
-   <Rule TypeName="IdentifiersShouldNotContainUnderscores" Category="Microsoft.Naming" CheckId="CA1707">
-    <Resolution Name="Member">Remove the underscores from member name {0}.</Resolution>
    </Rule>
    <Rule TypeName="MarkAssembliesWithClsCompliant" Category="Microsoft.Design" CheckId="CA1014">
     <Resolution Name="Default">Mark {0} with CLSCompliant(true) because it exposes externally visible types.</Resolution>
    </Rule>
    <Rule TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822">
     <Resolution Name="Default">The 'this' parameter (or 'Me' in Visual Basic) of {0} is never used. Mark the member as static (or Shared in Visual Basic) or use 'this'/'Me' in the method body or at least one property accessor, if appropriate.</Resolution>
-   </Rule>
-   <Rule TypeName="NestedTypesShouldNotBeVisible" Category="Microsoft.Design" CheckId="CA1034">
-    <Resolution Name="Default">Do not nest type {0}. Alternatively, change its accessibility so that it is not externally visible.</Resolution>
-   </Rule>
-   <Rule TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725">
-    <Resolution Name="Default">In member {0}, change parameter name {1} to {2} in order to match the identifier as it has been declared in {3}.</Resolution>
    </Rule>
    <Rule TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819">
     <Resolution Name="Default">Change {0} to return a collection or make it a method.</Resolution>
@@ -385,9 +318,6 @@
    </Rule>
    <Rule TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305">
     <Resolution Name="Default">Because the behavior of {0} could vary based on the current user's locale settings, replace this call in {1} with a call to {2}. If the result of {2} will be displayed to the user, specify 'CultureInfo.CurrentCulture' as the 'IFormatProvider' parameter. Otherwise, if the result will be stored and accessed by software, such as when it is persisted to disk or to a database, specify 'CultureInfo.InvariantCulture'.</Resolution>
-   </Rule>
-   <Rule TypeName="TestForEmptyStringsUsingStringLength" Category="Microsoft.Performance" CheckId="CA1820">
-    <Resolution Name="IsNullOrEmpty">Replace the call to {0} in {1} with a call to 'String.IsNullOrEmpty'.</Resolution>
    </Rule>
   </Rules>
  </FxCopReport>

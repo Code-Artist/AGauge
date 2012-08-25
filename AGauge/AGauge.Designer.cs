@@ -1,4 +1,4 @@
-namespace AGaugeApp
+namespace AGauge
 {
     partial class AGauge
     {
