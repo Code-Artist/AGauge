@@ -82,14 +82,6 @@ namespace AGauge
         private Int32 m_ScaleLinesMajorOuterRadius = 80;
         private Int32 m_ScaleLinesMajorWidth = 2;
 
-        private Byte m_RangeIndex;
-        private Boolean[] m_RangeEnabled = { true, true, false, false, false };
-        private Color[] m_RangeColor = { Color.LightGreen, Color.Red, Color.FromKnownColor(KnownColor.Control), Color.FromKnownColor(KnownColor.Control), Color.FromKnownColor(KnownColor.Control) };
-        private Single[] m_RangeStartValue = { -100.0f, 300.0f, 0.0f, 0.0f, 0.0f };
-        private Single[] m_RangeEndValue = { 300.0f, 400.0f, 0.0f, 0.0f, 0.0f };
-        private Int32[] m_RangeInnerRadius = { 70, 70, 70, 70, 70 };
-        private Int32[] m_RangeOuterRadius = { 80, 80, 80, 80, 80 };
-
         private Int32 m_ScaleNumbersRadius = 95;
         private Color m_ScaleNumbersColor = Color.Black;
         private String m_ScaleNumbersFormat;
@@ -165,9 +157,14 @@ namespace AGauge
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             _GaugeRanges = new AGaugeRangeCollection();
             _GaugeCaptions = new AGaugeCaptionCollection();
+
+            //Default Values
+            Size = new Size(205, 180);
+            _GaugeRanges.Add(new AGaugeRange(Color.LightGreen, -100, 300, 70, 80));
+            _GaugeRanges.Add(new AGaugeRange(Color.Red, 300, 400, 70, 80));
         }
 
-        #region properties
+        #region Properties
 
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("AGauge"),
@@ -181,22 +178,14 @@ namespace AGauge
                 {
                     m_value = Math.Min(Math.Max(value, m_MinValue), m_MaxValue);
 
-                    if (this.DesignMode)
-                    {
-                        drawGaugeBackground = true;
-                    }
+                    if (this.DesignMode) drawGaugeBackground = true;
 
-                    for (Int32 counter = 0; counter < NUMOFRANGES - 1; counter++)
+                    foreach (AGaugeRange ptrRange in _GaugeRanges)
                     {
-                        if ((m_RangeStartValue[counter] <= m_value)
-                        && (m_value <= m_RangeEndValue[counter])
-                        && (m_RangeEnabled[counter]))
+                        if ((m_value >= ptrRange.StartValue)
+                            && (m_value <= ptrRange.EndValue))
                         {
-                            if (!m_valueIsInRange[counter]) OnValueInRangeChanged(counter);
-                        }
-                        else
-                        {
-                            m_valueIsInRange[counter] = false;
+                            OnValueInRangeChanged(0);
                         }
                     }
                     Refresh();
@@ -204,20 +193,20 @@ namespace AGauge
             }
         }
 
-        private AGaugeRangeCollection _GaugeRanges;
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("AGauge"),
         System.ComponentModel.Description("Gauge Ranges.")]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
         public AGaugeRangeCollection GaugeRanges { get { return _GaugeRanges; } }
+        private AGaugeRangeCollection _GaugeRanges;
 
-        private AGaugeCaptionCollection _GaugeCaptions;
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("AGauge"),
         System.ComponentModel.Description("Gauge Ranges.")]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
         public AGaugeCaptionCollection GaugeCaptions { get { return _GaugeCaptions; } }
-        
+        private AGaugeCaptionCollection _GaugeCaptions;
+
         #region << Gauge Captions >>
 
         [System.ComponentModel.Browsable(true),
@@ -730,182 +719,6 @@ namespace AGauge
 
         #endregion
 
-        #region << Gauge Range >>
-
-        [System.ComponentModel.Browsable(true),
-        System.ComponentModel.Category("AGauge"),
-        System.ComponentModel.RefreshProperties(RefreshProperties.All),
-        System.ComponentModel.Description("The range index. set this to a value of 0 up to 4 to change the corresponding range's properties.")]
-        public Byte RangeIndex
-        {
-            get { return m_RangeIndex; }
-            set
-            {
-                if ((m_RangeIndex != value)
-                && (0 <= value)
-                && (value < NUMOFRANGES))
-                {
-                    m_RangeIndex = value;
-                    drawGaugeBackground = true;
-                    Refresh();
-                }
-            }
-        }
-
-        [System.ComponentModel.Browsable(true),
-        System.ComponentModel.Category("AGauge"),
-        System.ComponentModel.Description("Enables or disables the range selected by Range_Idx.")]
-        public Boolean RangeEnabled
-        {
-            get { return m_RangeEnabled[m_RangeIndex]; }
-            set
-            {
-                if (m_RangeEnabled[m_RangeIndex] != value)
-                {
-                    m_RangeEnabled[m_RangeIndex] = value;
-                    RangesEnabled = m_RangeEnabled;
-                    drawGaugeBackground = true;
-                    Refresh();
-                }
-            }
-        }
-
-        [System.ComponentModel.Browsable(false)]
-        public Boolean[] RangesEnabled
-        {
-            get { return m_RangeEnabled; }
-            set { m_RangeEnabled = value; }
-        }
-
-        [System.ComponentModel.Browsable(true),
-        System.ComponentModel.Category("AGauge"),
-        System.ComponentModel.Description("The color of the range.")]
-        public Color RangeColor
-        {
-            get { return m_RangeColor[m_RangeIndex]; }
-            set
-            {
-                if (m_RangeColor[m_RangeIndex] != value)
-                {
-                    m_RangeColor[m_RangeIndex] = value;
-                    RangesColor = m_RangeColor;
-                    drawGaugeBackground = true;
-                    Refresh();
-                }
-            }
-        }
-
-        [System.ComponentModel.Browsable(false)]
-        public Color[] RangesColor
-        {
-            get { return m_RangeColor; }
-            set { m_RangeColor = value; }
-        }
-
-        [System.ComponentModel.Browsable(true),
-        System.ComponentModel.Category("AGauge"),
-        System.ComponentModel.Description("The start value of the range, must be less than RangeEndValue.")]
-        public Single RangeStartValue
-        {
-            get { return m_RangeStartValue[m_RangeIndex]; }
-            set
-            {
-                if ((m_RangeStartValue[m_RangeIndex] != value)
-                && (value < m_RangeEndValue[m_RangeIndex]))
-                {
-                    m_RangeStartValue[m_RangeIndex] = value;
-                    RangesStartValue = m_RangeStartValue;
-                    drawGaugeBackground = true;
-                    Refresh();
-                }
-            }
-        }
-
-        [System.ComponentModel.Browsable(false)]
-        public Single[] RangesStartValue
-        {
-            get { return m_RangeStartValue; }
-            set { m_RangeStartValue = value; }
-        }
-
-        [System.ComponentModel.Browsable(true),
-        System.ComponentModel.Category("AGauge"),
-        System.ComponentModel.Description("The end value of the range. Must be greater than RangeStartValue.")]
-        public Single RangeEndValue
-        {
-            get { return m_RangeEndValue[m_RangeIndex]; }
-            set
-            {
-                if ((m_RangeEndValue[m_RangeIndex] != value)
-                && (m_RangeStartValue[m_RangeIndex] < value))
-                {
-                    m_RangeEndValue[m_RangeIndex] = value;
-                    RangesEndValue = m_RangeEndValue;
-                    drawGaugeBackground = true;
-                    Refresh();
-                }
-            }
-        }
-
-        [System.ComponentModel.Browsable(false)]
-        public Single[] RangesEndValue
-        {
-            get { return m_RangeEndValue; }
-            set { m_RangeEndValue = value; }
-        }
-
-        [System.ComponentModel.Browsable(true),
-        System.ComponentModel.Category("AGauge"),
-        System.ComponentModel.Description("The inner radius of the range.")]
-        public Int32 RangeInnerRadius
-        {
-            get { return m_RangeInnerRadius[m_RangeIndex]; }
-            set
-            {
-                if (m_RangeInnerRadius[m_RangeIndex] != value)
-                {
-                    m_RangeInnerRadius[m_RangeIndex] = value;
-                    RangesInnerRadius = m_RangeInnerRadius;
-                    drawGaugeBackground = true;
-                    Refresh();
-                }
-            }
-        }
-
-        [System.ComponentModel.Browsable(false)]
-        public Int32[] RangesInnerRadius
-        {
-            get { return m_RangeInnerRadius; }
-            set { m_RangeInnerRadius = value; }
-        }
-
-        [System.ComponentModel.Browsable(true),
-        System.ComponentModel.Category("AGauge"),
-        System.ComponentModel.Description("The inner radius of the range.")]
-        public Int32 RangeOuterRadius
-        {
-            get { return m_RangeOuterRadius[m_RangeIndex]; }
-            set
-            {
-                if (m_RangeOuterRadius[m_RangeIndex] != value)
-                {
-                    m_RangeOuterRadius[m_RangeIndex] = value;
-                    RangesOuterRadius = m_RangeOuterRadius;
-                    drawGaugeBackground = true;
-                    Refresh();
-                }
-            }
-        }
-
-        [System.ComponentModel.Browsable(false)]
-        public Int32[] RangesOuterRadius
-        {
-            get { return m_RangeOuterRadius; }
-            set { m_RangeOuterRadius = value; }
-        }
-
-        #endregion
-
         #region << Gauge Scale Numbers >>
 
         [System.ComponentModel.Browsable(true),
@@ -1231,20 +1044,22 @@ namespace AGauge
                 GraphicsPath gp = new GraphicsPath();
                 Single rangeStartAngle;
                 Single rangeSweepAngle;
-                for (Int32 counter = 0; counter < NUMOFRANGES; counter++)
+
+                foreach (AGaugeRange ptrRange in _GaugeRanges)
                 {
-                    if (m_RangeEndValue[counter] > m_RangeStartValue[counter]
-                    && m_RangeEnabled[counter])
+                    if (ptrRange.EndValue > ptrRange.StartValue)
                     {
-                        rangeStartAngle = m_BaseArcStart + (m_RangeStartValue[counter] - m_MinValue) * m_BaseArcSweep / (m_MaxValue - m_MinValue);
-                        rangeSweepAngle = (m_RangeEndValue[counter] - m_RangeStartValue[counter]) * m_BaseArcSweep / (m_MaxValue - m_MinValue);
+                        rangeStartAngle = m_BaseArcStart + (ptrRange.StartValue - m_MinValue) * m_BaseArcSweep / (m_MaxValue - m_MinValue);
+                        rangeSweepAngle = (ptrRange.EndValue - ptrRange.StartValue) * m_BaseArcSweep / (m_MaxValue - m_MinValue);
                         gp.Reset();
-                        gp.AddPie(new Rectangle(m_Center.X - m_RangeOuterRadius[counter], m_Center.Y - m_RangeOuterRadius[counter], 2 * m_RangeOuterRadius[counter], 2 * m_RangeOuterRadius[counter]), rangeStartAngle, rangeSweepAngle);
+                        gp.AddPie(new Rectangle(m_Center.X - ptrRange.OuterRadius, m_Center.Y - ptrRange.OuterRadius, 
+                            2 * ptrRange.OuterRadius, 2 * ptrRange.OuterRadius), rangeStartAngle, rangeSweepAngle);
                         gp.Reverse();
-                        gp.AddPie(new Rectangle(m_Center.X - m_RangeInnerRadius[counter], m_Center.Y - m_RangeInnerRadius[counter], 2 * m_RangeInnerRadius[counter], 2 * m_RangeInnerRadius[counter]), rangeStartAngle, rangeSweepAngle);
+                        gp.AddPie(new Rectangle(m_Center.X - ptrRange.InnerRadius, m_Center.Y - ptrRange.InnerRadius, 
+                            2 * ptrRange.InnerRadius, 2 * ptrRange.InnerRadius), rangeStartAngle, rangeSweepAngle);
                         gp.Reverse();
                         ggr.SetClip(gp);
-                        ggr.FillPie(new SolidBrush(m_RangeColor[counter]), new Rectangle(m_Center.X - m_RangeOuterRadius[counter], m_Center.Y - m_RangeOuterRadius[counter], 2 * m_RangeOuterRadius[counter], 2 * m_RangeOuterRadius[counter]), rangeStartAngle, rangeSweepAngle);
+                        ggr.FillPie(new SolidBrush(ptrRange.Color), new Rectangle(m_Center.X - ptrRange.OuterRadius, m_Center.Y - ptrRange.OuterRadius, 2 * ptrRange.OuterRadius, 2 * ptrRange.OuterRadius), rangeStartAngle, rangeSweepAngle);
                     }
                 }
 
@@ -1526,6 +1341,7 @@ namespace AGauge
 
     }
 
+    #region[ Gauge Range ]
     public class AGaugeRangeCollection : CollectionBase
     {
         public AGaugeRange this[int index] { get { return (AGaugeRange)List[index]; } }
@@ -1537,15 +1353,54 @@ namespace AGauge
     }
     public class AGaugeRange
     {
-        public Boolean Enabled { get; set; }
+        public AGaugeRange() { }
+        public AGaugeRange(Color color, Single startValue, Single endValue, Int32 innerRadius, Int32 outerRadius)
+        {
+            Color = color;
+            _StartValue = startValue;
+            _EndValue = endValue;
+            InnerRadius = innerRadius;
+            OuterRadius = outerRadius;
+        }
+
+        [System.ComponentModel.Browsable(true),
+        System.ComponentModel.Category("AGauge"),
+        System.ComponentModel.Description("The color of the range.")]
         public Color Color { get; set; }
-        public Single StartValue { get; set; }
-        public Single EndValue { get; set; }
+
+        [System.ComponentModel.Browsable(true),
+        System.ComponentModel.Category("AGauge"),
+        System.ComponentModel.Description("The start value of the range, must be less than RangeEndValue.")]
+        public Single StartValue
+        {
+            get { return _StartValue; }
+            set { if (value > _EndValue) _StartValue = value; }
+        }
+        private Single _StartValue;
+
+        [System.ComponentModel.Browsable(true),
+        System.ComponentModel.Category("AGauge"),
+        System.ComponentModel.Description("The end value of the range. Must be greater than RangeStartValue.")]
+        public Single EndValue
+        {
+            get { return _EndValue; }
+            set { if (value < _StartValue) _EndValue = value; }
+        }
+        private Single _EndValue;
+
+        [System.ComponentModel.Browsable(true),
+        System.ComponentModel.Category("AGauge"),
+        System.ComponentModel.Description("The inner radius of the range.")]
         public Int32 InnerRadius { get; set; }
+
+        [System.ComponentModel.Browsable(true),
+        System.ComponentModel.Category("AGauge"),
+        System.ComponentModel.Description("The outer radius of the range.")]
         public Int32 OuterRadius { get; set; }
     }
+    #endregion
 
-
+    #region [ Gauge Caption ]
     public class AGaugeCaptionCollection : CollectionBase
     {
         public AGaugeCaption this[int index] { get { return (AGaugeCaption)List[index]; } }
@@ -1561,6 +1416,7 @@ namespace AGauge
         public String Text { get; set; }
         public Point Position { get; set; }
     }
+    #endregion
 
     /// <summary>
     /// First needle color
@@ -1581,6 +1437,7 @@ namespace AGauge
     /// </summary>
     public class ValueInRangeChangedEventArgs : EventArgs
     {
+        //ToDo: Range index or gauge value??
         public Int32 Value { get; private set; }
         public ValueInRangeChangedEventArgs(Int32 valueInRange)
         {
