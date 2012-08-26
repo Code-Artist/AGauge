@@ -25,9 +25,14 @@ using System.Text;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.Diagnostics;
+using System.Collections;
 
 namespace AGauge
 {
+    /// <summary>
+    /// <para>AGauge - Copyright (C) 2007 A.J.Bauer</para>
+    /// <link>http://www.codeproject.com/Articles/17559/A-fast-and-performing-gauge</link>
+    /// </summary>
     [ToolboxBitmapAttribute(typeof(AGauge), "AGauge.AGauge.bmp"),
     DefaultEvent("ValueInRangeChanged"),
     Description("Displays a value on an analog gauge. Raises an event if the value enters one of the definable ranges.")]
@@ -157,8 +162,9 @@ namespace AGauge
         public AGauge()
         {
             InitializeComponent();
-
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+            _GaugeRanges = new AGaugeRangeCollection();
+            _GaugeCaptions = new AGaugeCaptionCollection();
         }
 
         #region properties
@@ -198,6 +204,20 @@ namespace AGauge
             }
         }
 
+        private AGaugeRangeCollection _GaugeRanges;
+        [System.ComponentModel.Browsable(true),
+        System.ComponentModel.Category("AGauge"),
+        System.ComponentModel.Description("Gauge Ranges.")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
+        public AGaugeRangeCollection GaugeRanges { get { return _GaugeRanges; } }
+
+        private AGaugeCaptionCollection _GaugeCaptions;
+        [System.ComponentModel.Browsable(true),
+        System.ComponentModel.Category("AGauge"),
+        System.ComponentModel.Description("Gauge Ranges.")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
+        public AGaugeCaptionCollection GaugeCaptions { get { return _GaugeCaptions; } }
+        
         #region << Gauge Captions >>
 
         [System.ComponentModel.Browsable(true),
@@ -1506,6 +1526,42 @@ namespace AGauge
 
     }
 
+    public class AGaugeRangeCollection : CollectionBase
+    {
+        public AGaugeRange this[int index] { get { return (AGaugeRange)List[index]; } }
+        public bool Contains(AGaugeRange itemType) { return List.Contains(itemType); }
+        public int Add(AGaugeRange itemType) { return List.Add(itemType); }
+        public void Remove(AGaugeRange itemType) { List.Remove(itemType); }
+        public void Insert(int index, AGaugeRange itemType) { List.Insert(index, itemType); }
+        public int IndexOf(AGaugeRange itemType) { return List.IndexOf(itemType); }
+    }
+    public class AGaugeRange
+    {
+        public Boolean Enabled { get; set; }
+        public Color Color { get; set; }
+        public Single StartValue { get; set; }
+        public Single EndValue { get; set; }
+        public Int32 InnerRadius { get; set; }
+        public Int32 OuterRadius { get; set; }
+    }
+
+
+    public class AGaugeCaptionCollection : CollectionBase
+    {
+        public AGaugeCaption this[int index] { get { return (AGaugeCaption)List[index]; } }
+        public bool Contains(AGaugeCaption itemType) { return List.Contains(itemType); }
+        public int Add(AGaugeCaption itemType) { return List.Add(itemType); }
+        public void Remove(AGaugeCaption itemType) { List.Remove(itemType); }
+        public void Insert(int index, AGaugeCaption itemType) { List.Insert(index, itemType); }
+        public int IndexOf(AGaugeCaption itemType) { return List.IndexOf(itemType); }
+    }
+    public class AGaugeCaption
+    {
+        public Color Color { get; set; }
+        public String Text { get; set; }
+        public Point Position { get; set; }
+    }
+
     /// <summary>
     /// First needle color
     /// </summary>
@@ -1532,10 +1588,6 @@ namespace AGauge
         }
     }
 
-    /// <summary>
-    /// <para>AGauge - Copyright (C) 2007 A.J.Bauer</para>
-    /// <link>http://www.codeproject.com/Articles/17559/A-fast-and-performing-gauge</link>
-    /// </summary>
     [System.Runtime.CompilerServices.CompilerGenerated]
     class NamespaceDoc { } //Namespace Documentation
 }

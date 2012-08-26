@@ -28,6 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
+            AGauge.AGaugeCaption aGaugeCaption3 = new AGauge.AGaugeCaption();
+            AGauge.AGaugeCaption aGaugeCaption4 = new AGauge.AGaugeCaption();
+            AGauge.AGaugeRange aGaugeRange3 = new AGauge.AGaugeRange();
+            AGauge.AGaugeRange aGaugeRange4 = new AGauge.AGaugeRange();
             this.aGauge1 = new AGauge.AGauge();
             this.SuspendLayout();
             // 
@@ -60,6 +64,28 @@
         ""};
             this.aGauge1.CaptionText = "";
             this.aGauge1.Center = new System.Drawing.Point(100, 100);
+            aGaugeCaption3.Color = System.Drawing.Color.Empty;
+            aGaugeCaption3.Position = new System.Drawing.Point(0, 0);
+            aGaugeCaption3.Text = "Test";
+            aGaugeCaption4.Color = System.Drawing.Color.Empty;
+            aGaugeCaption4.Position = new System.Drawing.Point(0, 0);
+            aGaugeCaption4.Text = "Test2";
+            this.aGauge1.GaugeCaptions.Add(aGaugeCaption3);
+            this.aGauge1.GaugeCaptions.Add(aGaugeCaption4);
+            aGaugeRange3.Color = System.Drawing.Color.Empty;
+            aGaugeRange3.Enabled = false;
+            aGaugeRange3.EndValue = 0F;
+            aGaugeRange3.InnerRadius = 0;
+            aGaugeRange3.OuterRadius = 0;
+            aGaugeRange3.StartValue = 0F;
+            aGaugeRange4.Color = System.Drawing.Color.Empty;
+            aGaugeRange4.Enabled = true;
+            aGaugeRange4.EndValue = 0F;
+            aGaugeRange4.InnerRadius = 0;
+            aGaugeRange4.OuterRadius = 0;
+            aGaugeRange4.StartValue = 0F;
+            this.aGauge1.GaugeRanges.Add(aGaugeRange3);
+            this.aGauge1.GaugeRanges.Add(aGaugeRange4);
             this.aGauge1.Location = new System.Drawing.Point(12, 12);
             this.aGauge1.MaxValue = 400F;
             this.aGauge1.MinValue = 0F;
