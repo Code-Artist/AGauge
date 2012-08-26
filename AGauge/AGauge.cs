@@ -1209,6 +1209,8 @@ namespace AGauge
         #endregion
     }
 
+    //ToDo: Expose name properties for range and label.
+
     #region[ Gauge Range ]
     public class AGaugeRangeCollection : CollectionBase
     {
@@ -1330,8 +1332,6 @@ namespace AGauge
     }
     public class AGaugeLabel
     {
-        //ToDo: Add Font option to GaugeCaption, inherited from parent by default.
-
         private AGauge Owner;
         [System.ComponentModel.Browsable(false)]
         public void SetOwner(AGauge value) { Owner = value; }
