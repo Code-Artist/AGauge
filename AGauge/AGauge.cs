@@ -146,13 +146,13 @@ namespace AGauge
         {
             InitializeComponent();
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
-            _GaugeRanges = new AGaugeRangeCollection();
-            _GaugeLabels = new AGaugeLabelCollection();
+            _GaugeRanges = new AGaugeRangeCollection(this);
+            _GaugeLabels = new AGaugeLabelCollection(this);
 
             //Default Values
             Size = new Size(205, 180);
-            _GaugeRanges.Add(new AGaugeRange(Color.LightGreen, -100, 300, 70, 80));
-            _GaugeRanges.Add(new AGaugeRange(Color.Red, 300, 400, 70, 80));
+            //_GaugeRanges.Add(new AGaugeRange(Color.LightGreen, -100, 300, 70, 80));
+            //_GaugeRanges.Add(new AGaugeRange(Color.Red, 300, 400, 70, 80));
         }
 
         #region Properties
@@ -779,6 +779,7 @@ namespace AGauge
         #endregion
 
         #region Helper
+
         private void FindFontBounds()
         {
             //find upper and lower bounds for numeric characters
@@ -835,6 +836,14 @@ namespace AGauge
                 c1--;
             }
         }
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+
+        public void RepaintControl()
+        {
+            drawGaugeBackground = true;
+            Refresh();
+        }
+
         #endregion
 
         #region Base member overrides
@@ -913,10 +922,10 @@ namespace AGauge
                         rangeStartAngle = m_BaseArcStart + (ptrRange.StartValue - m_MinValue) * m_BaseArcSweep / (m_MaxValue - m_MinValue);
                         rangeSweepAngle = (ptrRange.EndValue - ptrRange.StartValue) * m_BaseArcSweep / (m_MaxValue - m_MinValue);
                         gp.Reset();
-                        gp.AddPie(new Rectangle(m_Center.X - ptrRange.OuterRadius, m_Center.Y - ptrRange.OuterRadius, 
+                        gp.AddPie(new Rectangle(m_Center.X - ptrRange.OuterRadius, m_Center.Y - ptrRange.OuterRadius,
                             2 * ptrRange.OuterRadius, 2 * ptrRange.OuterRadius), rangeStartAngle, rangeSweepAngle);
                         gp.Reverse();
-                        gp.AddPie(new Rectangle(m_Center.X - ptrRange.InnerRadius, m_Center.Y - ptrRange.InnerRadius, 
+                        gp.AddPie(new Rectangle(m_Center.X - ptrRange.InnerRadius, m_Center.Y - ptrRange.InnerRadius,
                             2 * ptrRange.InnerRadius, 2 * ptrRange.InnerRadius), rangeStartAngle, rangeSweepAngle);
                         gp.Reverse();
                         ggr.SetClip(gp);
@@ -1027,11 +1036,11 @@ namespace AGauge
                     ggr.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SystemDefault;
                 }
 
-                foreach (AGaugeLabel ptrCaption in _GaugeLabels)
+                foreach (AGaugeLabel ptrGaugeLabel in _GaugeLabels)
                 {
-                    if(! String.IsNullOrEmpty(ptrCaption.Text))
-                        ggr.DrawString(ptrCaption.Text, Font, new SolidBrush(ptrCaption.Color), 
-                            ptrCaption.Position.X, ptrCaption.Position.Y, StringFormat.GenericTypographic);
+                    if (!String.IsNullOrEmpty(ptrGaugeLabel.Text))
+                        ggr.DrawString(ptrGaugeLabel.Text, ptrGaugeLabel.Font, new SolidBrush(ptrGaugeLabel.Color),
+                            ptrGaugeLabel.Position.X, ptrGaugeLabel.Position.Y, StringFormat.GenericTypographic);
                 }
             }
 
@@ -1203,12 +1212,29 @@ namespace AGauge
     #region[ Gauge Range ]
     public class AGaugeRangeCollection : CollectionBase
     {
+        private AGauge Owner;
+        public AGaugeRangeCollection(AGauge sender) { Owner = sender; }
+
         public AGaugeRange this[int index] { get { return (AGaugeRange)List[index]; } }
         public bool Contains(AGaugeRange itemType) { return List.Contains(itemType); }
-        public int Add(AGaugeRange itemType) { return List.Add(itemType); }
+        public int Add(AGaugeRange itemType) { itemType.SetOwner(Owner); return List.Add(itemType); }
         public void Remove(AGaugeRange itemType) { List.Remove(itemType); }
-        public void Insert(int index, AGaugeRange itemType) { List.Insert(index, itemType); }
+        public void Insert(int index, AGaugeRange itemType) { itemType.SetOwner(Owner); List.Insert(index, itemType); }
         public int IndexOf(AGaugeRange itemType) { return List.IndexOf(itemType); }
+
+        protected override void OnInsert(int index, object value)
+        {
+            base.OnInsert(index, value);
+            ((AGaugeRange)value).SetOwner(Owner);
+        }
+        protected override void OnRemove(int index, object value)
+        {
+            if (Owner != null) Owner.RepaintControl();
+        }
+        protected override void OnClear()
+        {
+            if (Owner != null) Owner.RepaintControl();
+        }
     }
     public class AGaugeRange
     {
@@ -1222,73 +1248,122 @@ namespace AGauge
             OuterRadius = outerRadius;
         }
 
-        [System.ComponentModel.Browsable(true),
-        System.ComponentModel.Category("AGauge"),
-        System.ComponentModel.Description("The color of the range.")]
-        public Color Color { get; set; }
+        private AGauge Owner;
+        [System.ComponentModel.Browsable(false)]
+        public void SetOwner(AGauge value) { Owner = value; }
+        private void NotifyOwner() { if (Owner != null) Owner.RepaintControl(); }
 
         [System.ComponentModel.Browsable(true),
-        System.ComponentModel.Category("AGauge"),
+        System.ComponentModel.Category("Appearance"),
+        System.ComponentModel.Description("The color of the range.")]
+        public Color Color { get { return _Color; } set { _Color = value; NotifyOwner(); } }
+        private Color _Color;
+
+        [System.ComponentModel.Browsable(true),
+        System.ComponentModel.Category("Limits"),
         System.ComponentModel.Description("The start value of the range, must be less than RangeEndValue.")]
         public Single StartValue
         {
             get { return _StartValue; }
-            set { if (value > _EndValue) _StartValue = value; }
+            set { if (value < _EndValue) { _StartValue = value; NotifyOwner(); } }
         }
         private Single _StartValue;
 
         [System.ComponentModel.Browsable(true),
-        System.ComponentModel.Category("AGauge"),
+        System.ComponentModel.Category("Limits"),
         System.ComponentModel.Description("The end value of the range. Must be greater than RangeStartValue.")]
         public Single EndValue
         {
             get { return _EndValue; }
-            set { if (value < _StartValue) _EndValue = value; }
+            set { if (value > _StartValue) { _EndValue = value; NotifyOwner(); } }
         }
         private Single _EndValue;
 
         [System.ComponentModel.Browsable(true),
-        System.ComponentModel.Category("AGauge"),
+        System.ComponentModel.Category("Appearance"),
         System.ComponentModel.Description("The inner radius of the range.")]
-        public Int32 InnerRadius { get; set; }
+        public Int32 InnerRadius
+        {
+            get { return _InnerRadius; }
+            set { if (value > 0) { _InnerRadius = value; NotifyOwner(); } }
+        }
+        private Int32 _InnerRadius = 1;
 
         [System.ComponentModel.Browsable(true),
-        System.ComponentModel.Category("AGauge"),
+        System.ComponentModel.Category("Appearance"),
         System.ComponentModel.Description("The outer radius of the range.")]
-        public Int32 OuterRadius { get; set; }
+        public Int32 OuterRadius
+        {
+            get { return _OuterRadius; }
+            set { if (value > 0) { _OuterRadius = value; NotifyOwner(); } }
+        }
+        private Int32 _OuterRadius = 2;
     }
     #endregion
 
     #region [ Gauge Label ]
     public class AGaugeLabelCollection : CollectionBase
     {
+        private AGauge Owner;
+        public AGaugeLabelCollection(AGauge sender) { Owner = sender; }
+
         public AGaugeLabel this[int index] { get { return (AGaugeLabel)List[index]; } }
         public bool Contains(AGaugeLabel itemType) { return List.Contains(itemType); }
-        public int Add(AGaugeLabel itemType) { return List.Add(itemType); }
+        public int Add(AGaugeLabel itemType) { itemType.SetOwner(Owner); return List.Add(itemType); }
         public void Remove(AGaugeLabel itemType) { List.Remove(itemType); }
-        public void Insert(int index, AGaugeLabel itemType) { List.Insert(index, itemType); }
+        public void Insert(int index, AGaugeLabel itemType) { itemType.SetOwner(Owner); List.Insert(index, itemType); }
         public int IndexOf(AGaugeLabel itemType) { return List.IndexOf(itemType); }
+
+        protected override void OnInsert(int index, object value)
+        {
+            base.OnInsert(index, value);
+            ((AGaugeLabel)value).SetOwner(Owner);
+        }
+        protected override void OnRemove(int index, object value)
+        {
+            if (Owner != null) Owner.RepaintControl();
+        }
+        protected override void OnClear()
+        {
+            if (Owner != null) Owner.RepaintControl();
+        }
     }
     public class AGaugeLabel
     {
         //ToDo: Add Font option to GaugeCaption, inherited from parent by default.
 
-        public AGaugeLabel() { Color = Color.FromKnownColor(KnownColor.WindowText); }
+        private AGauge Owner;
+        [System.ComponentModel.Browsable(false)]
+        public void SetOwner(AGauge value) { Owner = value; }
+        private void NotifyOwner() { if (Owner != null) Owner.RepaintControl(); }
 
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("AGauge"),
         System.ComponentModel.Description("The color of the caption text.")]
-        public Color Color { get; set; }
+        public Color Color { get { return _Color; } set { _Color = value; NotifyOwner(); } }
+        private Color _Color = Color.FromKnownColor(KnownColor.WindowText);
 
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("AGauge"),
         System.ComponentModel.Description("The text of the caption.")]
-        public String Text { get; set; }
+        public String Text { get { return _Text; } set { _Text = value; NotifyOwner(); } }
+        private String _Text;
 
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("AGauge"),
         System.ComponentModel.Description("The position of the caption.")]
-        public Point Position { get; set; }
+        public Point Position { get { return _Position; } set { _Position = value; NotifyOwner(); } }
+        private Point _Position;
+
+        [System.ComponentModel.Browsable(true),
+        System.ComponentModel.Category("AGauge"),
+        System.ComponentModel.Description("Font of Text.")]
+        public Font Font { get { return _Font; } set { _Font = value; } }
+        private Font _Font = DefaultFont;
+
+        public void ResetFont() { _Font = DefaultFont; }
+        private Boolean ShouldSerializeFont() { return (_Font != DefaultFont); }
+        private static Font DefaultFont = System.Windows.Forms.Control.DefaultFont;
     }
     #endregion
 
