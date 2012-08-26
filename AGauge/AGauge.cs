@@ -38,11 +38,7 @@ namespace AGauge
     Description("Displays a value on an analog gauge. Raises an event if the value enters one of the definable ranges.")]
     public partial class AGauge : Control
     {
-        #region enum, var, delegate, event
-
-        private const Byte ZERO = 0;
-        private const Byte NUMOFCAPS = 5;
-        private const Byte NUMOFRANGES = 5;
+        #region Private Fields
 
         private Single fontBoundY1;
         private Single fontBoundY2;
@@ -50,11 +46,6 @@ namespace AGauge
         private Boolean drawGaugeBackground = true;
 
         private Single m_value;
-        private Boolean[] m_valueIsInRange = { false, false, false, false, false };
-        private Byte m_CaptionIndex = 1;
-        private Color[] m_CaptionColor = { Color.Black, Color.Black, Color.Black, Color.Black, Color.Black };
-        private String[] m_CaptionsText = { "", "", "", "", "" };
-        private Point[] m_CaptionsPosition = { new Point(10, 10), new Point(10, 10), new Point(10, 10), new Point(10, 10), new Point(10, 10) };
         private Point m_Center = new Point(100, 100);
         private Single m_MinValue = -100;
         private Single m_MaxValue = 400;
@@ -156,7 +147,7 @@ namespace AGauge
             InitializeComponent();
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             _GaugeRanges = new AGaugeRangeCollection();
-            _GaugeCaptions = new AGaugeCaptionCollection();
+            _GaugeLabels = new AGaugeLabelCollection();
 
             //Default Values
             Size = new Size(205, 180);
@@ -202,140 +193,10 @@ namespace AGauge
 
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("AGauge"),
-        System.ComponentModel.Description("Gauge Ranges.")]
+        System.ComponentModel.Description("Gauge Labels.")]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
-        public AGaugeCaptionCollection GaugeCaptions { get { return _GaugeCaptions; } }
-        private AGaugeCaptionCollection _GaugeCaptions;
-
-        #region << Gauge Captions >>
-
-        [System.ComponentModel.Browsable(true),
-        System.ComponentModel.Category("AGauge"),
-        System.ComponentModel.RefreshProperties(RefreshProperties.All),
-        System.ComponentModel.Description("The caption index. set this to a value of 0 up to 4 to change the corresponding caption's properties.")]
-        public Byte CaptionIndex
-        {
-            get
-            {
-                return m_CaptionIndex;
-            }
-            set
-            {
-                if ((m_CaptionIndex != value)
-                && (0 <= value)
-                && (value < 5))
-                {
-                    m_CaptionIndex = value;
-                }
-            }
-        }
-
-        [System.ComponentModel.Browsable(true),
-        System.ComponentModel.Category("AGauge"),
-        System.ComponentModel.Description("The color of the caption text.")]
-        private Color CaptionColor
-        {
-            get
-            {
-                return m_CaptionColor[m_CaptionIndex];
-            }
-            set
-            {
-                if (m_CaptionColor[m_CaptionIndex] != value)
-                {
-                    m_CaptionColor[m_CaptionIndex] = value;
-                    CaptionColors = m_CaptionColor;
-                    drawGaugeBackground = true;
-                    Refresh();
-                }
-            }
-        }
-
-        [System.ComponentModel.Browsable(false)]
-        public Color[] CaptionColors
-        {
-            get
-            {
-                return m_CaptionColor;
-            }
-            set
-            {
-                m_CaptionColor = value;
-            }
-        }
-
-        [System.ComponentModel.Browsable(true),
-        System.ComponentModel.Category("AGauge"),
-        System.ComponentModel.Description("The text of the caption.")]
-        public String CaptionText
-        {
-            get
-            {
-                return m_CaptionsText[m_CaptionIndex];
-            }
-            set
-            {
-                if (m_CaptionsText[m_CaptionIndex] != value)
-                {
-                    m_CaptionsText[m_CaptionIndex] = value;
-                    CaptionsText = m_CaptionsText;
-                    drawGaugeBackground = true;
-                    Refresh();
-                }
-            }
-        }
-
-        [System.ComponentModel.Browsable(false)]
-        public String[] CaptionsText
-        {
-            get
-            {
-                return m_CaptionsText;
-            }
-            set
-            {
-                for (Int32 counter = 0; counter < 5; counter++)
-                {
-                    m_CaptionsText[counter] = value[counter];
-                }
-            }
-        }
-
-        [System.ComponentModel.Browsable(true),
-        System.ComponentModel.Category("AGauge"),
-        System.ComponentModel.Description("The position of the caption.")]
-        public Point CaptionPosition
-        {
-            get
-            {
-                return m_CaptionsPosition[m_CaptionIndex];
-            }
-            set
-            {
-                if (m_CaptionsPosition[m_CaptionIndex] != value)
-                {
-                    m_CaptionsPosition[m_CaptionIndex] = value;
-                    CaptionsPosition = m_CaptionsPosition;
-                    drawGaugeBackground = true;
-                    Refresh();
-                }
-            }
-        }
-
-        [System.ComponentModel.Browsable(false)]
-        public Point[] CaptionsPosition
-        {
-            get
-            {
-                return m_CaptionsPosition;
-            }
-            set
-            {
-                m_CaptionsPosition = value;
-            }
-        }
-
-        #endregion // << Gauge Captions >>
+        public AGaugeLabelCollection GaugeLabels { get { return _GaugeLabels; } }
+        private AGaugeLabelCollection _GaugeLabels;
 
         #region << Gauge Base >>
 
@@ -1166,12 +1027,11 @@ namespace AGauge
                     ggr.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SystemDefault;
                 }
 
-                for (Int32 counter = 0; counter < NUMOFCAPS; counter++)
+                foreach (AGaugeLabel ptrCaption in _GaugeLabels)
                 {
-                    if (String.IsNullOrEmpty(m_CaptionsText[counter]))
-                    {
-                        ggr.DrawString(m_CaptionsText[counter], Font, new SolidBrush(m_CaptionColor[counter]), m_CaptionsPosition[counter].X, m_CaptionsPosition[counter].Y, StringFormat.GenericTypographic);
-                    }
+                    if(! String.IsNullOrEmpty(ptrCaption.Text))
+                        ggr.DrawString(ptrCaption.Text, Font, new SolidBrush(ptrCaption.Color), 
+                            ptrCaption.Position.X, ptrCaption.Position.Y, StringFormat.GenericTypographic);
                 }
             }
 
@@ -1338,7 +1198,6 @@ namespace AGauge
         }
 
         #endregion
-
     }
 
     #region[ Gauge Range ]
@@ -1400,20 +1259,35 @@ namespace AGauge
     }
     #endregion
 
-    #region [ Gauge Caption ]
-    public class AGaugeCaptionCollection : CollectionBase
+    #region [ Gauge Label ]
+    public class AGaugeLabelCollection : CollectionBase
     {
-        public AGaugeCaption this[int index] { get { return (AGaugeCaption)List[index]; } }
-        public bool Contains(AGaugeCaption itemType) { return List.Contains(itemType); }
-        public int Add(AGaugeCaption itemType) { return List.Add(itemType); }
-        public void Remove(AGaugeCaption itemType) { List.Remove(itemType); }
-        public void Insert(int index, AGaugeCaption itemType) { List.Insert(index, itemType); }
-        public int IndexOf(AGaugeCaption itemType) { return List.IndexOf(itemType); }
+        public AGaugeLabel this[int index] { get { return (AGaugeLabel)List[index]; } }
+        public bool Contains(AGaugeLabel itemType) { return List.Contains(itemType); }
+        public int Add(AGaugeLabel itemType) { return List.Add(itemType); }
+        public void Remove(AGaugeLabel itemType) { List.Remove(itemType); }
+        public void Insert(int index, AGaugeLabel itemType) { List.Insert(index, itemType); }
+        public int IndexOf(AGaugeLabel itemType) { return List.IndexOf(itemType); }
     }
-    public class AGaugeCaption
+    public class AGaugeLabel
     {
+        //ToDo: Add Font option to GaugeCaption, inherited from parent by default.
+
+        public AGaugeLabel() { Color = Color.FromKnownColor(KnownColor.WindowText); }
+
+        [System.ComponentModel.Browsable(true),
+        System.ComponentModel.Category("AGauge"),
+        System.ComponentModel.Description("The color of the caption text.")]
         public Color Color { get; set; }
+
+        [System.ComponentModel.Browsable(true),
+        System.ComponentModel.Category("AGauge"),
+        System.ComponentModel.Description("The text of the caption.")]
         public String Text { get; set; }
+
+        [System.ComponentModel.Browsable(true),
+        System.ComponentModel.Category("AGauge"),
+        System.ComponentModel.Description("The position of the caption.")]
         public Point Position { get; set; }
     }
     #endregion

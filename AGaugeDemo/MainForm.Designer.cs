@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            AGauge.AGaugeLabel aGaugeCaption1 = new AGauge.AGaugeLabel();
             AGauge.AGaugeRange aGaugeRange1 = new AGauge.AGaugeRange();
             AGauge.AGaugeRange aGaugeRange2 = new AGauge.AGaugeRange();
             this.aGauge1 = new AGauge.AGauge();
@@ -40,29 +41,12 @@
             this.aGauge1.BaseArcStart = 135;
             this.aGauge1.BaseArcSweep = 270;
             this.aGauge1.BaseArcWidth = 2;
-            this.aGauge1.CaptionColors = new System.Drawing.Color[] {
-        System.Drawing.Color.Black,
-        System.Drawing.Color.Black,
-        System.Drawing.Color.Black,
-        System.Drawing.Color.Black,
-        System.Drawing.Color.Black};
-            this.aGauge1.CaptionIndex = ((byte)(1));
-            this.aGauge1.CaptionPosition = new System.Drawing.Point(10, 10);
-            this.aGauge1.CaptionsPosition = new System.Drawing.Point[] {
-        new System.Drawing.Point(10, 10),
-        new System.Drawing.Point(10, 10),
-        new System.Drawing.Point(10, 10),
-        new System.Drawing.Point(10, 10),
-        new System.Drawing.Point(10, 10)};
-            this.aGauge1.CaptionsText = new string[] {
-        "",
-        "",
-        "",
-        "",
-        ""};
-            this.aGauge1.CaptionText = "";
             this.aGauge1.Center = new System.Drawing.Point(100, 100);
-            aGaugeRange1.Color = System.Drawing.Color.LightGreen;
+            aGaugeCaption1.Color = System.Drawing.SystemColors.WindowText;
+            aGaugeCaption1.Position = new System.Drawing.Point(0, 0);
+            aGaugeCaption1.Text = "Test";
+            this.aGauge1.GaugeLabels.Add(aGaugeCaption1);
+            aGaugeRange1.Color = System.Drawing.Color.Yellow;
             aGaugeRange1.EndValue = 300F;
             aGaugeRange1.InnerRadius = 70;
             aGaugeRange1.OuterRadius = 80;
@@ -74,7 +58,7 @@
             aGaugeRange2.StartValue = 300F;
             this.aGauge1.GaugeRanges.Add(aGaugeRange1);
             this.aGauge1.GaugeRanges.Add(aGaugeRange2);
-            this.aGauge1.Location = new System.Drawing.Point(12, 29);
+            this.aGauge1.Location = new System.Drawing.Point(10, 27);
             this.aGauge1.MaxValue = 400F;
             this.aGauge1.MinValue = -100F;
             this.aGauge1.Name = "aGauge1";
@@ -123,6 +107,7 @@
         #endregion
 
         private AGauge.AGauge aGauge1;
+
 
 
 
