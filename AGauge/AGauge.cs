@@ -151,8 +151,6 @@ namespace AGauge
 
             //Default Values
             Size = new Size(205, 180);
-            //_GaugeRanges.Add(new AGaugeRange(Color.LightGreen, -100, 300, 70, 80));
-            //_GaugeRanges.Add(new AGaugeRange(Color.Red, 300, 400, 70, 80));
         }
 
         #region Properties
