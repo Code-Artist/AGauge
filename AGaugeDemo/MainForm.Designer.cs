@@ -30,7 +30,6 @@
         {
             AGauge.AGaugeLabel aGaugeLabel1 = new AGauge.AGaugeLabel();
             AGauge.AGaugeRange aGaugeRange1 = new AGauge.AGaugeRange();
-            AGauge.AGaugeRange aGaugeRange2 = new AGauge.AGaugeRange();
             this.aGauge1 = new AGauge.AGauge();
             this.SuspendLayout();
             // 
@@ -43,30 +42,26 @@
             this.aGauge1.BaseArcWidth = 2;
             this.aGauge1.Center = new System.Drawing.Point(100, 100);
             aGaugeLabel1.Color = System.Drawing.SystemColors.WindowText;
-            aGaugeLabel1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            aGaugeLabel1.Name = "GaugeLabel1";
             aGaugeLabel1.Position = new System.Drawing.Point(0, 0);
-            aGaugeLabel1.Text = "test";
+            aGaugeLabel1.Text = null;
             this.aGauge1.GaugeLabels.Add(aGaugeLabel1);
-            aGaugeRange1.Color = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
-            aGaugeRange1.EndValue = 150F;
-            aGaugeRange1.InnerRadius = 70;
-            aGaugeRange1.OuterRadius = 80;
-            aGaugeRange1.StartValue = 50F;
-            aGaugeRange2.Color = System.Drawing.Color.Red;
-            aGaugeRange2.EndValue = 100F;
-            aGaugeRange2.InnerRadius = 55;
-            aGaugeRange2.OuterRadius = 80;
-            aGaugeRange2.StartValue = 0F;
+            aGaugeRange1.Color = System.Drawing.Color.Empty;
+            aGaugeRange1.EndValue = 0F;
+            aGaugeRange1.InnerRadius = 1;
+            aGaugeRange1.InRange = false;
+            aGaugeRange1.Name = "GaugeRange1";
+            aGaugeRange1.OuterRadius = 2;
+            aGaugeRange1.StartValue = 0F;
             this.aGauge1.GaugeRanges.Add(aGaugeRange1);
-            this.aGauge1.GaugeRanges.Add(aGaugeRange2);
-            this.aGauge1.Location = new System.Drawing.Point(20, 20);
+            this.aGauge1.Location = new System.Drawing.Point(21, 26);
             this.aGauge1.MaxValue = 400F;
             this.aGauge1.MinValue = -100F;
             this.aGauge1.Name = "aGauge1";
             this.aGauge1.NeedleColor1 = AGauge.AGaugeNeedleColor.Gray;
             this.aGauge1.NeedleColor2 = System.Drawing.Color.DimGray;
             this.aGauge1.NeedleRadius = 80;
-            this.aGauge1.NeedleType = 0;
+            this.aGauge1.NeedleType = AGauge.NeedleType.Advanced;
             this.aGauge1.NeedleWidth = 2;
             this.aGauge1.ScaleLinesInterColor = System.Drawing.Color.Black;
             this.aGauge1.ScaleLinesInterInnerRadius = 73;
@@ -108,6 +103,10 @@
         #endregion
 
         private AGauge.AGauge aGauge1;
+
+
+
+
 
 
 

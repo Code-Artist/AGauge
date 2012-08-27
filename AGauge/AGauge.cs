@@ -80,7 +80,7 @@ namespace AGauge
         private Int32 m_ScaleNumbersStepScaleLines = 1;
         private Int32 m_ScaleNumbersRotation;
 
-        private Int32 m_NeedleType;
+        private NeedleType m_NeedleType;
         private Int32 m_NeedleRadius = 80;
         private AGaugeNeedleColor m_NeedleColor1 = AGaugeNeedleColor.Gray;
         private Color m_NeedleColor2 = Color.DimGray;
@@ -93,12 +93,12 @@ namespace AGauge
         /// <summary>
         /// Event raised if the value falls into a defined range.
         /// </summary>
-        [Description("This event is raised if the value falls into a defined range.")]
+        [Description("This event is raised if the value is entering or leaving defined range.")]
         public event EventHandler<ValueInRangeChangedEventArgs> ValueInRangeChanged;
-        private void OnValueInRangeChanged(int value)
+        private void OnValueInRangeChanged(AGaugeRange range, Single value)
         {
             EventHandler<ValueInRangeChangedEventArgs> e = ValueInRangeChanged;
-            if (e != null) e(this, new ValueInRangeChangedEventArgs(value));
+            if (e != null) e(this, new ValueInRangeChangedEventArgs(range, value));
         }
 
         #endregion
@@ -176,7 +176,21 @@ namespace AGauge
                         if ((m_value >= ptrRange.StartValue)
                             && (m_value <= ptrRange.EndValue))
                         {
-                            OnValueInRangeChanged(0);
+                            //Entering Range
+                            if (!ptrRange.InRange)
+                            {
+                                ptrRange.InRange = true;
+                                OnValueInRangeChanged(ptrRange, m_value);
+                            }
+                        }
+                        else
+                        {
+                            //Leaving Range
+                            if (ptrRange.InRange)
+                            {
+                                ptrRange.InRange = false;
+                                OnValueInRangeChanged(ptrRange, m_value);
+                            }
                         }
                     }
                     Refresh();
@@ -688,11 +702,10 @@ namespace AGauge
 
         #region << Gauge Needle >>
 
-        //ToDo: Define enum type for needle
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("AGauge"),
         System.ComponentModel.Description("The type of the needle, currently only type 0 and 1 are supported. Type 0 looks nicers but if you experience performance problems you might consider using type 1.")]
-        public Int32 NeedleType
+        public NeedleType NeedleType
         {
             get { return m_NeedleType; }
             set
@@ -1053,7 +1066,7 @@ namespace AGauge
 
             switch (m_NeedleType)
             {
-                case 0:
+                case NeedleType.Advanced:
                     PointF[] points = new PointF[3];
                     Brush brush1 = Brushes.White;
                     Brush brush2 = Brushes.White;
@@ -1158,9 +1171,8 @@ namespace AGauge
                     e.Graphics.DrawLine(new Pen(m_NeedleColor2), Center.X, Center.Y, points[0].X, points[0].Y);
                     e.Graphics.DrawLine(new Pen(m_NeedleColor2), Center.X, Center.Y, points[1].X, points[1].Y);
                     break;
-                case 1:
-                    Point startPoint = new Point((Int32)(Center.X - m_NeedleRadius / 8 * Math.Cos(needleAngle)),
-                                               (Int32)(Center.Y - m_NeedleRadius / 8 * Math.Sin(needleAngle)));
+                case NeedleType.Simple: Point startPoint = new Point((Int32)(Center.X - m_NeedleRadius / 8 * Math.Cos(needleAngle)),
+                                                (Int32)(Center.Y - m_NeedleRadius / 8 * Math.Sin(needleAngle)));
                     Point endPoint = new Point((Int32)(Center.X + m_NeedleRadius * Math.Cos(needleAngle)),
                                              (Int32)(Center.Y + m_NeedleRadius * Math.Sin(needleAngle)));
 
@@ -1209,8 +1221,6 @@ namespace AGauge
         #endregion
     }
 
-    //ToDo: Expose name properties for range and label.
-
     #region[ Gauge Range ]
     public class AGaugeRangeCollection : CollectionBase
     {
@@ -1219,13 +1229,32 @@ namespace AGauge
 
         public AGaugeRange this[int index] { get { return (AGaugeRange)List[index]; } }
         public bool Contains(AGaugeRange itemType) { return List.Contains(itemType); }
-        public int Add(AGaugeRange itemType) { itemType.SetOwner(Owner); return List.Add(itemType); }
+        public int Add(AGaugeRange itemType)
+        {
+            itemType.SetOwner(Owner);
+            itemType.Name = GetUniqueName();
+            return List.Add(itemType);
+        }
         public void Remove(AGaugeRange itemType) { List.Remove(itemType); }
-        public void Insert(int index, AGaugeRange itemType) { itemType.SetOwner(Owner); List.Insert(index, itemType); }
+        public void Insert(int index, AGaugeRange itemType)
+        {
+            itemType.SetOwner(Owner);
+            itemType.Name = GetUniqueName();
+            List.Insert(index, itemType);
+        }
         public int IndexOf(AGaugeRange itemType) { return List.IndexOf(itemType); }
+        public AGaugeRange FindByName(string name)
+        {
+            foreach (AGaugeRange ptrRange in List)
+            {
+                if (ptrRange.Name == name) return ptrRange;
+            }
+            return null;
+        }
 
         protected override void OnInsert(int index, object value)
         {
+            ((AGaugeRange)value).Name = GetUniqueName();
             base.OnInsert(index, value);
             ((AGaugeRange)value).SetOwner(Owner);
         }
@@ -1236,6 +1265,24 @@ namespace AGauge
         protected override void OnClear()
         {
             if (Owner != null) Owner.RepaintControl();
+        }
+
+        private string GetUniqueName()
+        {
+            const string Prefix = "GaugeRange";
+            int index = 1;
+            while (this.Count != 0)
+            {
+                for (int x = 0; x < this.Count; x++)
+                {
+                    if (this[x].Name == (Prefix + index.ToString()))
+                        continue;
+                    else
+                        return Prefix + index.ToString();
+                }
+                index++;
+            };
+            return Prefix + index.ToString();
         }
     }
     public class AGaugeRange
@@ -1249,6 +1296,15 @@ namespace AGauge
             InnerRadius = innerRadius;
             OuterRadius = outerRadius;
         }
+
+        [System.ComponentModel.Browsable(true),
+        System.ComponentModel.Category("Design"),
+        System.ComponentModel.DisplayName("(Name)"),
+        System.ComponentModel.Description("Instance Name.")]
+        public string Name { get; set; }
+
+        [System.ComponentModel.Browsable(false)]
+        public Boolean InRange { get; set; }
 
         private AGauge Owner;
         [System.ComponentModel.Browsable(false)]
@@ -1311,13 +1367,32 @@ namespace AGauge
 
         public AGaugeLabel this[int index] { get { return (AGaugeLabel)List[index]; } }
         public bool Contains(AGaugeLabel itemType) { return List.Contains(itemType); }
-        public int Add(AGaugeLabel itemType) { itemType.SetOwner(Owner); return List.Add(itemType); }
+        public int Add(AGaugeLabel itemType)
+        {
+            itemType.SetOwner(Owner);
+            itemType.Name = GetUniqueName();
+            return List.Add(itemType);
+        }
         public void Remove(AGaugeLabel itemType) { List.Remove(itemType); }
-        public void Insert(int index, AGaugeLabel itemType) { itemType.SetOwner(Owner); List.Insert(index, itemType); }
+        public void Insert(int index, AGaugeLabel itemType)
+        {
+            itemType.SetOwner(Owner);
+            itemType.Name = GetUniqueName();
+            List.Insert(index, itemType);
+        }
         public int IndexOf(AGaugeLabel itemType) { return List.IndexOf(itemType); }
+        public AGaugeLabel FindByName(string name)
+        {
+            foreach (AGaugeLabel ptrRange in List)
+            {
+                if (ptrRange.Name == name) return ptrRange;
+            }
+            return null;
+        }
 
         protected override void OnInsert(int index, object value)
         {
+            ((AGaugeLabel)value).Name = GetUniqueName();
             base.OnInsert(index, value);
             ((AGaugeLabel)value).SetOwner(Owner);
         }
@@ -1329,34 +1404,58 @@ namespace AGauge
         {
             if (Owner != null) Owner.RepaintControl();
         }
+
+        private string GetUniqueName()
+        {
+            const string Prefix = "GaugeLabel";
+            int index = 1;
+            while (this.Count != 0)
+            {
+                for (int x = 0; x < this.Count; x++)
+                {
+                    if (this[x].Name == (Prefix + index.ToString()))
+                        continue;
+                    else
+                        return Prefix + index.ToString();
+                }
+                index++;
+            };
+            return Prefix + index.ToString();
+        }
     }
     public class AGaugeLabel
     {
+        [System.ComponentModel.Browsable(true),
+        System.ComponentModel.Category("Design"),
+        System.ComponentModel.DisplayName("(Name)"),
+        System.ComponentModel.Description("Instance Name.")]
+        public string Name { get; set; }
+
         private AGauge Owner;
         [System.ComponentModel.Browsable(false)]
         public void SetOwner(AGauge value) { Owner = value; }
         private void NotifyOwner() { if (Owner != null) Owner.RepaintControl(); }
 
         [System.ComponentModel.Browsable(true),
-        System.ComponentModel.Category("AGauge"),
+        System.ComponentModel.Category("Appearance"),
         System.ComponentModel.Description("The color of the caption text.")]
         public Color Color { get { return _Color; } set { _Color = value; NotifyOwner(); } }
         private Color _Color = Color.FromKnownColor(KnownColor.WindowText);
 
         [System.ComponentModel.Browsable(true),
-        System.ComponentModel.Category("AGauge"),
+        System.ComponentModel.Category("Appearance"),
         System.ComponentModel.Description("The text of the caption.")]
         public String Text { get { return _Text; } set { _Text = value; NotifyOwner(); } }
         private String _Text;
 
         [System.ComponentModel.Browsable(true),
-        System.ComponentModel.Category("AGauge"),
+        System.ComponentModel.Category("Appearance"),
         System.ComponentModel.Description("The position of the caption.")]
         public Point Position { get { return _Position; } set { _Position = value; NotifyOwner(); } }
         private Point _Position;
 
         [System.ComponentModel.Browsable(true),
-        System.ComponentModel.Category("AGauge"),
+        System.ComponentModel.Category("Appearance"),
         System.ComponentModel.Description("Font of Text.")]
         public Font Font { get { return _Font; } set { _Font = value; } }
         private Font _Font = DefaultFont;
@@ -1366,6 +1465,8 @@ namespace AGauge
         private static Font DefaultFont = System.Windows.Forms.Control.DefaultFont;
     }
     #endregion
+
+    #region [ Gauge Enum ]
 
     /// <summary>
     /// First needle color
@@ -1381,16 +1482,31 @@ namespace AGauge
         Magenta = 6
     };
 
+    public enum NeedleType
+    {
+        Advanced,
+        Simple
+    }
+
+    #endregion
+
     /// <summary>
     /// Event argument for <see cref="ValueInRangeChanged"/> event.
     /// </summary>
     public class ValueInRangeChangedEventArgs : EventArgs
     {
-        //ToDo: Range index or gauge value??
-        public Int32 Value { get; private set; }
-        public ValueInRangeChangedEventArgs(Int32 valueInRange)
+        /// <summary>
+        /// Affected GaugeRange
+        /// </summary>
+        public AGaugeRange Range { get; private set; }
+        /// <summary>
+        /// Gauge Value
+        /// </summary>
+        public Single Value { get; private set; }
+        public ValueInRangeChangedEventArgs(AGaugeRange range, Single value)
         {
-            this.Value = valueInRange;
+            this.Range = range;
+            this.Value = value;
         }
     }
 
