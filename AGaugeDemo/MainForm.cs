@@ -35,7 +35,7 @@ namespace AGaugeDemo
             System.Diagnostics.Debug.WriteLine("InRange Event.");
             if (e.Range == alert)
             {
-                panel1.BackColor = e.Range.InRange ? Color.Red : Color.FromKnownColor(KnownColor.Control);
+                panel1.BackColor = e.InRange ? Color.Red : Color.FromKnownColor(KnownColor.Control);
             }
         }
     }

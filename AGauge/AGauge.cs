@@ -110,7 +110,7 @@ namespace System.Windows.Forms
         private void OnValueInRangeChanged(AGaugeRange range, Single value)
         {
             EventHandler<ValueInRangeChangedEventArgs> e = ValueInRangeChanged;
-            if (e != null) e(this, new ValueInRangeChangedEventArgs(range, value));
+            if (e != null) e(this, new ValueInRangeChangedEventArgs(range, value, range.InRange));
         }
 
         #endregion
@@ -1520,10 +1520,15 @@ namespace System.Windows.Forms
         /// Gauge Value
         /// </summary>
         public Single Value { get; private set; }
-        public ValueInRangeChangedEventArgs(AGaugeRange range, Single value)
+        /// <summary>
+        /// True if value is within current range.
+        /// </summary>
+        public bool InRange { get; private set; }
+        public ValueInRangeChangedEventArgs(AGaugeRange range, Single value, bool inRange)
         {
             this.Range = range;
             this.Value = value;
+            this.InRange = inRange;
         }
     }
 
