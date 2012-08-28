@@ -90,9 +90,14 @@ namespace AGauge
 
         #region EventHandler
 
-        /// <summary>
-        /// Event raised if the value falls into a defined range.
-        /// </summary>
+        [Description("This event is raised when gauge value changed.")]
+        public event EventHandler ValueChanged;
+        private void OnValueChanged()
+        {
+            EventHandler e = ValueChanged;
+            if (e != null) e(this, null);
+        }
+
         [Description("This event is raised if the value is entering or leaving defined range.")]
         public event EventHandler<ValueInRangeChangedEventArgs> ValueInRangeChanged;
         private void OnValueInRangeChanged(AGaugeRange range, Single value)
@@ -163,9 +168,11 @@ namespace AGauge
             get { return m_value; }
             set
             {
+                value = Math.Min(Math.Max(value, m_MinValue), m_MaxValue);
                 if (m_value != value)
                 {
-                    m_value = Math.Min(Math.Max(value, m_MinValue), m_MaxValue);
+                    m_value = value;
+                    OnValueChanged();
 
                     if (this.DesignMode) drawGaugeBackground = true;
 
@@ -1217,6 +1224,7 @@ namespace AGauge
         }
 
         #endregion
+
     }
 
     #region[ Gauge Range ]
@@ -1269,15 +1277,19 @@ namespace AGauge
         {
             const string Prefix = "GaugeRange";
             int index = 1;
+            bool valid;
             while (this.Count != 0)
             {
+                valid = true;
                 for (int x = 0; x < this.Count; x++)
                 {
                     if (this[x].Name == (Prefix + index.ToString()))
-                        continue;
-                    else
-                        return Prefix + index.ToString();
+                    {
+                        valid = false;
+                        break;
+                    }
                 }
+                if (valid) break;
                 index++;
             };
             return Prefix + index.ToString();
@@ -1455,7 +1467,7 @@ namespace AGauge
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("Appearance"),
         System.ComponentModel.Description("Font of Text.")]
-        public Font Font { get { return _Font; } set { _Font = value; } }
+        public Font Font { get { return _Font; } set { _Font = value; NotifyOwner(); } }
         private Font _Font = DefaultFont;
 
         public void ResetFont() { _Font = DefaultFont; }
