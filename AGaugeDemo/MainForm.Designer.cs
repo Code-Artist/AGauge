@@ -96,7 +96,7 @@
             this.aGauge1.NeedleColor1 = System.Windows.Forms.AGaugeNeedleColor.Yellow;
             this.aGauge1.NeedleColor2 = System.Drawing.Color.Olive;
             this.aGauge1.NeedleRadius = 80;
-            this.aGauge1.NeedleType = System.Windows.Forms.NeedleType.Advanced;
+            this.aGauge1.NeedleType = System.Windows.Forms.NeedleType.Advance;
             this.aGauge1.NeedleWidth = 2;
             this.aGauge1.ScaleLinesInterColor = System.Drawing.Color.Black;
             this.aGauge1.ScaleLinesInterInnerRadius = 73;

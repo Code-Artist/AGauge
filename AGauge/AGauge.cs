@@ -1078,7 +1078,7 @@ namespace System.Windows.Forms
 
             switch (m_NeedleType)
             {
-                case NeedleType.Advanced:
+                case NeedleType.Advance:
                     PointF[] points = new PointF[3];
                     Brush brush1 = Brushes.White;
                     Brush brush2 = Brushes.White;
@@ -1501,7 +1501,7 @@ namespace System.Windows.Forms
 
     public enum NeedleType
     {
-        Advanced,
+        Advance,
         Simple
     }
 
