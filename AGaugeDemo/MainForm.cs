@@ -17,7 +17,7 @@ namespace AGaugeDemo
         {
             InitializeComponent();
             label = aGauge1.GaugeLabels.FindByName("GaugeLabel1");
-            alert = aGauge1.GaugeRanges.FindByName("GaugeRange1");
+            alert = aGauge1.GaugeRanges.FindByName("AlertRange");
         }
 
         private void trackBar1_ValueChanged(object sender, EventArgs e)

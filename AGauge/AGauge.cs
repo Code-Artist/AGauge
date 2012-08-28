@@ -7,7 +7,6 @@
 //  Permission is granted to anyone to use this software for any purpose,
 //  including commercial applications, and to alter it and redistribute it
 //  freely, subject to the following restrictions:
-
 //  1. The origin of this software must not be misrepresented; you must not
 //     claim that you wrote the original software. if you use this software
 //     in a product, an acknowledgment in the product documentation would be
@@ -15,6 +14,14 @@
 //  2. Altered source versions must be plainly marked as such, and must not be
 //     misrepresented as being the original software.
 //  3. This notice may not be removed or altered from any source distribution.
+//
+// -----------------------------------------------------------------------------------
+// Copyright (C) 2012 Code Artist
+// 
+// Added several improvement to original code created by A.J.Bauer.
+// Visit: http://codearteng.blogspot.com for more information on change history.
+//
+// -----------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -1238,14 +1245,14 @@ namespace AGauge
         public int Add(AGaugeRange itemType)
         {
             itemType.SetOwner(Owner);
-            itemType.Name = GetUniqueName();
+            if(string.IsNullOrEmpty(itemType.Name)) itemType.Name = GetUniqueName();
             return List.Add(itemType);
         }
         public void Remove(AGaugeRange itemType) { List.Remove(itemType); }
         public void Insert(int index, AGaugeRange itemType)
         {
             itemType.SetOwner(Owner);
-            itemType.Name = GetUniqueName();
+            if (string.IsNullOrEmpty(itemType.Name)) itemType.Name = GetUniqueName();
             List.Insert(index, itemType);
         }
         public int IndexOf(AGaugeRange itemType) { return List.IndexOf(itemType); }
@@ -1260,7 +1267,7 @@ namespace AGauge
 
         protected override void OnInsert(int index, object value)
         {
-            ((AGaugeRange)value).Name = GetUniqueName();
+            if (string.IsNullOrEmpty(((AGaugeRange)value).Name)) ((AGaugeRange)value).Name = GetUniqueName();
             base.OnInsert(index, value);
             ((AGaugeRange)value).SetOwner(Owner);
         }
@@ -1380,14 +1387,14 @@ namespace AGauge
         public int Add(AGaugeLabel itemType)
         {
             itemType.SetOwner(Owner);
-            itemType.Name = GetUniqueName();
+            if (string.IsNullOrEmpty(itemType.Name)) itemType.Name = GetUniqueName();
             return List.Add(itemType);
         }
         public void Remove(AGaugeLabel itemType) { List.Remove(itemType); }
         public void Insert(int index, AGaugeLabel itemType)
         {
             itemType.SetOwner(Owner);
-            itemType.Name = GetUniqueName();
+            if (string.IsNullOrEmpty(itemType.Name)) itemType.Name = GetUniqueName();
             List.Insert(index, itemType);
         }
         public int IndexOf(AGaugeLabel itemType) { return List.IndexOf(itemType); }
@@ -1402,7 +1409,7 @@ namespace AGauge
 
         protected override void OnInsert(int index, object value)
         {
-            ((AGaugeLabel)value).Name = GetUniqueName();
+            if (string.IsNullOrEmpty(((AGaugeLabel)value).Name)) ((AGaugeLabel)value).Name = GetUniqueName();
             base.OnInsert(index, value);
             ((AGaugeLabel)value).SetOwner(Owner);
         }
