@@ -34,7 +34,7 @@ using System.Drawing.Drawing2D;
 using System.Diagnostics;
 using System.Collections;
 
-namespace AGauge
+namespace System.Windows.Forms
 {
     /// <summary>
     /// <para>AGauge - Copyright (C) 2007 A.J.Bauer</para>

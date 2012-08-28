@@ -1,4 +1,4 @@
-namespace AGauge
+namespace System.Windows.Forms
 {
     partial class AGauge
     {

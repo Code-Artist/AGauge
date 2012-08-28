@@ -11,8 +11,8 @@ namespace AGaugeDemo
 {
     public partial class MainForm : Form
     {
-        private AGauge.AGaugeLabel label;
-        private AGauge.AGaugeRange alert;
+        private System.Windows.Forms.AGaugeLabel label;
+        private System.Windows.Forms.AGaugeRange alert;
         public MainForm()
         {
             InitializeComponent();
@@ -30,7 +30,7 @@ namespace AGaugeDemo
             label.Text = aGauge1.Value.ToString();
         }
 
-        private void aGauge1_ValueInRangeChanged(object sender, AGauge.ValueInRangeChangedEventArgs e)
+        private void aGauge1_ValueInRangeChanged(object sender, System.Windows.Forms.ValueInRangeChangedEventArgs e)
         {
             System.Diagnostics.Debug.WriteLine("InRange Event.");
             if (e.Range == alert)
