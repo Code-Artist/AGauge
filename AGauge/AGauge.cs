@@ -1245,7 +1245,7 @@ namespace System.Windows.Forms
         public int Add(AGaugeRange itemType)
         {
             itemType.SetOwner(Owner);
-            if(string.IsNullOrEmpty(itemType.Name)) itemType.Name = GetUniqueName();
+            if (string.IsNullOrEmpty(itemType.Name)) itemType.Name = GetUniqueName();
             return List.Add(itemType);
         }
         public void Remove(AGaugeRange itemType) { List.Remove(itemType); }
@@ -1340,7 +1340,16 @@ namespace System.Windows.Forms
         public Single StartValue
         {
             get { return _StartValue; }
-            set { if (value < _EndValue) { _StartValue = value; NotifyOwner(); } }
+            set
+            {
+                if (Owner != null)
+                {
+                    if (value < Owner.MinValue) value = Owner.MinValue;
+                    if (value > Owner.MaxValue) value = Owner.MaxValue;
+                }
+                _StartValue = value; NotifyOwner();
+            }
+
         }
         private Single _StartValue;
 
@@ -1350,7 +1359,16 @@ namespace System.Windows.Forms
         public Single EndValue
         {
             get { return _EndValue; }
-            set { if (value > _StartValue) { _EndValue = value; NotifyOwner(); } }
+            set
+            {
+                if (Owner != null)
+                {
+                    if (value < Owner.MinValue) value = Owner.MinValue;
+                    if (value > Owner.MaxValue) value = Owner.MaxValue;
+                }
+                _EndValue = value; NotifyOwner();
+            }
+
         }
         private Single _EndValue;
 
