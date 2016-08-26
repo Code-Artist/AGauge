@@ -13,10 +13,13 @@ namespace System.Windows.Forms
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing)
             {
-                gaugeBitmap.Dispose();
-                components.Dispose();
+                if (null != gaugeBitmap)
+                    gaugeBitmap.Dispose();
+                
+                if (null != components)
+                    components.Dispose();
             }
             base.Dispose(disposing);
         }
