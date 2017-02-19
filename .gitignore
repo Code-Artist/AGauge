@@ -5,3 +5,5 @@ obj
 *.user
 .hgignore
 .hgtags
+*.hgignore
+.hgtags
