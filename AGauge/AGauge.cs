@@ -1078,6 +1078,7 @@ namespace System.Windows.Forms
             e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
             Single brushAngle = (Int32)(m_BaseArcStart + (m_value - m_MinValue) * m_BaseArcSweep / (m_MaxValue - m_MinValue)) % 360;
+            if (brushAngle < 0) brushAngle += 360;
             Double needleAngle = brushAngle * Math.PI / 180;
 
             switch (m_NeedleType)
