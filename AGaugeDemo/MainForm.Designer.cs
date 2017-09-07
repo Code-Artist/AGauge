@@ -89,7 +89,7 @@
             this.aGauge1.GaugeRanges.Add(aGaugeRange1);
             this.aGauge1.GaugeRanges.Add(aGaugeRange2);
             this.aGauge1.GaugeRanges.Add(aGaugeRange3);
-            this.aGauge1.Location = new System.Drawing.Point(67, 12);
+            this.aGauge1.Location = new System.Drawing.Point(66, 23);
             this.aGauge1.MaxValue = 200F;
             this.aGauge1.MinValue = 0F;
             this.aGauge1.Name = "aGauge1";
