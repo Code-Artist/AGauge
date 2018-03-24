@@ -1306,14 +1306,21 @@ namespace System.Windows.Forms
         {
             itemType.SetOwner(Owner);
             if (string.IsNullOrEmpty(itemType.Name)) itemType.Name = GetUniqueName();
-            return List.Add(itemType);
+            var ret = List.Add(itemType);
+            if (Owner != null) Owner.RepaintControl();
+            return ret;
         }
-        public void Remove(AGaugeRange itemType) { List.Remove(itemType); }
+        public void Remove(AGaugeRange itemType)
+        {
+            List.Remove(itemType);
+            if (Owner != null) Owner.RepaintControl();
+        }
         public void Insert(int index, AGaugeRange itemType)
         {
             itemType.SetOwner(Owner);
             if (string.IsNullOrEmpty(itemType.Name)) itemType.Name = GetUniqueName();
             List.Insert(index, itemType);
+            if (Owner != null) Owner.RepaintControl();
         }
         public int IndexOf(AGaugeRange itemType) { return List.IndexOf(itemType); }
         public AGaugeRange FindByName(string name)
@@ -1365,6 +1372,14 @@ namespace System.Windows.Forms
     public class AGaugeRange
     {
         public AGaugeRange() { }
+
+        public AGaugeRange(Color color, Single startValue, Single endValue)
+        {
+            Color = color;
+            _StartValue = startValue;
+            _EndValue = endValue;
+        }
+
         public AGaugeRange(Color color, Single startValue, Single endValue, Int32 innerRadius, Int32 outerRadius)
         {
             Color = color;
@@ -1409,7 +1424,6 @@ namespace System.Windows.Forms
                 }
                 _StartValue = value; NotifyOwner();
             }
-
         }
         private Single _StartValue;
 
@@ -1428,7 +1442,6 @@ namespace System.Windows.Forms
                 }
                 _EndValue = value; NotifyOwner();
             }
-
         }
         private Single _EndValue;
 
@@ -1440,7 +1453,7 @@ namespace System.Windows.Forms
             get { return _InnerRadius; }
             set { if (value > 0) { _InnerRadius = value; NotifyOwner(); } }
         }
-        private Int32 _InnerRadius = 1;
+        private Int32 _InnerRadius = 70;
 
         [System.ComponentModel.Browsable(true),
         System.ComponentModel.Category("Appearance"),
@@ -1450,7 +1463,7 @@ namespace System.Windows.Forms
             get { return _OuterRadius; }
             set { if (value > 0) { _OuterRadius = value; NotifyOwner(); } }
         }
-        private Int32 _OuterRadius = 2;
+        private Int32 _OuterRadius = 80;
     }
     #endregion
 
@@ -1466,14 +1479,21 @@ namespace System.Windows.Forms
         {
             itemType.SetOwner(Owner);
             if (string.IsNullOrEmpty(itemType.Name)) itemType.Name = GetUniqueName();
-            return List.Add(itemType);
+            var ret = List.Add(itemType);
+            if (Owner != null) Owner.RepaintControl();
+            return ret;
         }
-        public void Remove(AGaugeLabel itemType) { List.Remove(itemType); }
+        public void Remove(AGaugeLabel itemType)
+        {
+            List.Remove(itemType);
+            if (Owner != null) Owner.RepaintControl();
+        }
         public void Insert(int index, AGaugeLabel itemType)
         {
             itemType.SetOwner(Owner);
             if (string.IsNullOrEmpty(itemType.Name)) itemType.Name = GetUniqueName();
             List.Insert(index, itemType);
+            if (Owner != null) Owner.RepaintControl();
         }
         public int IndexOf(AGaugeLabel itemType) { return List.IndexOf(itemType); }
         public AGaugeLabel FindByName(string name)

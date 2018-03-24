@@ -16,9 +16,16 @@ namespace AGaugeDemo
         public MainFormTest()
         {
             InitializeComponent();
+
             label = aGauge1.GaugeLabels.FindByName("GaugeLabel1");
             alert = aGauge1.GaugeRanges.FindByName("AlertRange");
             //aGauge1.AutoSize = true;
+            aGauge1.ValueInRangeChanged += AGauge1_ValueInRangeChanged;
+        }
+
+        private void AGauge1_ValueInRangeChanged(object sender, ValueInRangeChangedEventArgs e)
+        {
+
         }
 
         private void trackBar1_ValueChanged(object sender, EventArgs e)
@@ -38,6 +45,12 @@ namespace AGaugeDemo
             {
                 panel1.BackColor = e.InRange ? Color.Red : Color.FromKnownColor(KnownColor.Control);
             }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            //aGauge1.GaugeRanges.RemoveAt(0);
+            aGauge1.GaugeRanges.Add(new AGaugeRange(Color.Blue, 40, 60));
         }
     }
 }
