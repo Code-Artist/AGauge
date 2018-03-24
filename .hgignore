@@ -3,3 +3,5 @@ obj
 bin
 *.suo
 *.user
+.git
+.gitignore
