@@ -54,7 +54,6 @@ namespace System.Windows.Forms
 
         private Single m_value;
         //private Boolean m_AutoSize = false;
-        private Size m_BaseSize;
         private Point m_Center = new Point(100, 100);
         private Single m_MinValue = -100;
         private Single m_MaxValue = 400;
@@ -164,7 +163,6 @@ namespace System.Windows.Forms
 
             //Default Values
             Size = new Size(205, 180);
-            m_BaseSize = Size;
         }
 
         #region Properties  
@@ -907,10 +905,11 @@ namespace System.Windows.Forms
             Single centerFactor = 1;
             var center = Center;
 
+
             if (AutoSize)
             {
-                double widthFactor = ((1.0 / (double)m_BaseSize.Width) * (double)Size.Width);
-                double heightFactor = ((1.0 / (double)m_BaseSize.Height) * (double)Size.Height);
+                double widthFactor = ((1.0 / (double)(2 * Center.X)) * (double)Size.Width);
+                double heightFactor = ((1.0 / (double)(2 * Center.Y)) * (double)Size.Height);
                 centerFactor = (float)Math.Min(widthFactor, heightFactor);
                 center = new Point((int)(Center.X * widthFactor), (int)(Center.Y * heightFactor));
             }
@@ -1111,13 +1110,15 @@ namespace System.Windows.Forms
                 }
 
                 #region _GaugeLabels
+                var Format = StringFormat.GenericTypographic;
+                Format.Alignment = StringAlignment.Center;
                 foreach (AGaugeLabel ptrGaugeLabel in _GaugeLabels)
                 {
                     if (!String.IsNullOrEmpty(ptrGaugeLabel.Text))
                     {
                         ggr.DrawString(ptrGaugeLabel.Text, ptrGaugeLabel.Font, new SolidBrush(ptrGaugeLabel.Color),
-                            (Single)((ptrGaugeLabel.Position.X - m_BaseSize.Width) * centerFactor) + (Single)center.X,
-                            (Single)((ptrGaugeLabel.Position.Y - m_BaseSize.Width) * centerFactor) + (Single)center.Y, StringFormat.GenericTypographic);
+                            (Single)((ptrGaugeLabel.Position.X) * centerFactor) + (Single)center.X,
+                            (Single)((ptrGaugeLabel.Position.Y) * centerFactor) + (Single)center.Y, Format);
                     }
                 }
                 #endregion
@@ -1538,6 +1539,7 @@ namespace System.Windows.Forms
             return Prefix + index.ToString();
         }
     }
+
     public class AGaugeLabel
     {
         [System.ComponentModel.Browsable(true),
