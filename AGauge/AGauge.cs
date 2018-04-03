@@ -1009,6 +1009,9 @@ namespace System.Windows.Forms
                 SizeF boundingBox;
                 Single countValue = 0;
                 Int32 counter1 = 0;
+                var Format = StringFormat.GenericTypographic;
+                Format.Alignment = StringAlignment.Near;
+
                 while (countValue <= (m_MaxValue - m_MinValue))
                 {
                     valueText = (m_MinValue + countValue).ToString(m_ScaleNumbersFormat);
@@ -1086,14 +1089,15 @@ namespace System.Windows.Forms
                         ggr.RotateTransform(90.0F + m_BaseArcStart + countValue * m_BaseArcSweep / (m_MaxValue - m_MinValue));
                     }
 
-                    ggr.TranslateTransform((Single)(center.X + (m_ScaleNumbersRadius * centerFactor) * Math.Cos((m_BaseArcStart + countValue * m_BaseArcSweep / (m_MaxValue - m_MinValue)) * Math.PI / 180.0f)),
-                                           (Single)(center.Y + (m_ScaleNumbersRadius * centerFactor) * Math.Sin((m_BaseArcStart + countValue * m_BaseArcSweep / (m_MaxValue - m_MinValue)) * Math.PI / 180.0f)),
+                    ggr.TranslateTransform((Single)(centerFactor * (center.X + m_ScaleNumbersRadius * Math.Cos((m_BaseArcStart + countValue * m_BaseArcSweep / (m_MaxValue - m_MinValue)) * Math.PI / 180.0f))),
+                                           (Single)(centerFactor * (center.Y + m_ScaleNumbersRadius * Math.Sin((m_BaseArcStart + countValue * m_BaseArcSweep / (m_MaxValue - m_MinValue)) * Math.PI / 180.0f))),
                                            System.Drawing.Drawing2D.MatrixOrder.Append);
 
 
                     if (counter1 >= ScaleNumbersStartScaleLine - 1)
                     {
-                        ggr.DrawString(valueText, Font, new SolidBrush(m_ScaleNumbersColor), (-boundingBox.Width / 2f), (-fontBoundY1 - (fontBoundY2 - fontBoundY1 + 1f) / 2f), StringFormat.GenericTypographic);
+                        var ptText = new PointF((-boundingBox.Width / 2f), (-fontBoundY1 - (fontBoundY2 - fontBoundY1 + 1f) / 2f));
+                        ggr.DrawString(valueText, Font, new SolidBrush(m_ScaleNumbersColor), ptText.X, ptText.Y, Format);
                     }
 
                     countValue += m_ScaleLinesMajorStepValue;
@@ -1110,7 +1114,7 @@ namespace System.Windows.Forms
                 }
 
                 #region _GaugeLabels
-                var Format = StringFormat.GenericTypographic;
+                Format = StringFormat.GenericTypographic;
                 Format.Alignment = StringAlignment.Center;
                 foreach (AGaugeLabel ptrGaugeLabel in _GaugeLabels)
                 {
