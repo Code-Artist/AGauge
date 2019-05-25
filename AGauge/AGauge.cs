@@ -33,6 +33,7 @@ using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.Diagnostics;
 using System.Collections;
+using System.ComponentModel.Design;
 
 namespace System.Windows.Forms
 {
@@ -889,6 +890,23 @@ namespace System.Windows.Forms
       Refresh();
     }
 
+    internal void NotifyChanging()
+    {
+      var ChangeService = (IComponentChangeService)Site?.GetService(typeof(IComponentChangeService));
+      if (ChangeService != null)
+      {
+        ChangeService.OnComponentChanging(this, null);
+      }
+    }
+
+    internal void NotifyChanged()
+    {
+      var ChangeService = (IComponentChangeService)Site?.GetService(typeof(IComponentChangeService));
+      if (ChangeService != null)
+      {
+        ChangeService.OnComponentChanged(this, null, null, null);
+      }
+    }
     #endregion
 
     #region Base member overrides
@@ -1348,6 +1366,21 @@ namespace System.Windows.Forms
   {
     private AGauge Owner;
     public AGaugeRangeCollection(AGauge sender) { Owner = sender; }
+    private void NotifyChanging()
+    {
+      if (Owner != null)
+      {
+        Owner.NotifyChanging();
+      }
+    }
+
+    private void NotifyChanged()
+    {
+      if (Owner != null)
+      {
+        Owner.NotifyChanged();
+      }
+    }
 
     public AGaugeRange this[int index] { get { return (AGaugeRange)List[index]; } }
     public bool Contains(AGaugeRange itemType) { return List.Contains(itemType); }
@@ -1383,17 +1416,23 @@ namespace System.Windows.Forms
 
     protected override void OnInsert(int index, object value)
     {
+      NotifyChanging();
       if (string.IsNullOrEmpty(((AGaugeRange)value).Name)) ((AGaugeRange)value).Name = GetUniqueName();
       base.OnInsert(index, value);
       ((AGaugeRange)value).SetOwner(Owner);
+      NotifyChanged();
     }
     protected override void OnRemove(int index, object value)
     {
+      NotifyChanging();
       if (Owner != null) Owner.RepaintControl();
+      NotifyChanged();
     }
     protected override void OnClear()
     {
+      NotifyChanging();
       if (Owner != null) Owner.RepaintControl();
+      NotifyChanged();
     }
 
     private string GetUniqueName()
@@ -1442,7 +1481,8 @@ namespace System.Windows.Forms
     System.ComponentModel.Category("Design"),
     System.ComponentModel.DisplayName("(Name)"),
     System.ComponentModel.Description("Instance Name.")]
-    public string Name { get; set; }
+    public string Name { get { return _Name; } set { NotifyChanging(); _Name = value; NotifyChanged(); } }
+    private string _Name; 
 
     [System.ComponentModel.Browsable(false)]
     public Boolean InRange { get; set; }
@@ -1451,11 +1491,26 @@ namespace System.Windows.Forms
     [System.ComponentModel.Browsable(false)]
     public void SetOwner(AGauge value) { Owner = value; }
     private void NotifyOwner() { if (Owner != null) Owner.RepaintControl(); }
+    private void NotifyChanging()
+    {
+      if (Owner != null)
+      {
+        Owner.NotifyChanging();
+      }
+    }
+
+    private void NotifyChanged()
+    {
+      if (Owner != null)
+      {
+        Owner.NotifyChanged();
+      }
+    }
 
     [System.ComponentModel.Browsable(true),
     System.ComponentModel.Category("Appearance"),
     System.ComponentModel.Description("The color of the range.")]
-    public Color Color { get { return _Color; } set { _Color = value; NotifyOwner(); } }
+    public Color Color { get { return _Color; } set { NotifyChanging(); _Color = value; NotifyOwner(); NotifyChanged(); } }
     private Color _Color;
 
     [System.ComponentModel.Browsable(true),
@@ -1466,12 +1521,15 @@ namespace System.Windows.Forms
       get { return _StartValue; }
       set
       {
+        NotifyChanging();
         if (Owner != null)
         {
           if (value < Owner.MinValue) value = Owner.MinValue;
           if (value > Owner.MaxValue) value = Owner.MaxValue;
         }
-        _StartValue = value; NotifyOwner();
+        _StartValue = value;
+        NotifyOwner();
+        NotifyChanged();
       }
     }
     private Single _StartValue;
@@ -1484,12 +1542,15 @@ namespace System.Windows.Forms
       get { return _EndValue; }
       set
       {
+        NotifyChanging();
         if (Owner != null)
         {
           if (value < Owner.MinValue) value = Owner.MinValue;
           if (value > Owner.MaxValue) value = Owner.MaxValue;
         }
-        _EndValue = value; NotifyOwner();
+        _EndValue = value;
+        NotifyOwner();
+        NotifyChanged();
       }
     }
     private Single _EndValue;
@@ -1500,7 +1561,7 @@ namespace System.Windows.Forms
     public Int32 InnerRadius
     {
       get { return _InnerRadius; }
-      set { if (value > 0) { _InnerRadius = value; NotifyOwner(); } }
+      set { if (value > 0) { NotifyChanging(); _InnerRadius = value; NotifyOwner(); NotifyChanged(); } }
     }
     private Int32 _InnerRadius = 70;
 
@@ -1510,7 +1571,7 @@ namespace System.Windows.Forms
     public Int32 OuterRadius
     {
       get { return _OuterRadius; }
-      set { if (value > 0) { _OuterRadius = value; NotifyOwner(); } }
+      set { if (value > 0) { NotifyChanging(); _OuterRadius = value; NotifyOwner(); NotifyChanged(); } }
     }
     private Int32 _OuterRadius = 80;
   }
@@ -1521,6 +1582,22 @@ namespace System.Windows.Forms
   {
     private AGauge Owner;
     public AGaugeLabelCollection(AGauge sender) { Owner = sender; }
+    private void NotifyChanging()
+    {
+      if (Owner != null)
+      {
+        Owner.NotifyChanging();
+      }
+    }
+
+    private void NotifyChanged()
+    {
+      if (Owner != null)
+      {
+        Owner.NotifyChanged();
+      }
+    }
+
 
     public AGaugeLabel this[int index] { get { return (AGaugeLabel)List[index]; } }
     public bool Contains(AGaugeLabel itemType) { return List.Contains(itemType); }
@@ -1556,17 +1633,23 @@ namespace System.Windows.Forms
 
     protected override void OnInsert(int index, object value)
     {
+      NotifyChanging();
       if (string.IsNullOrEmpty(((AGaugeLabel)value).Name)) ((AGaugeLabel)value).Name = GetUniqueName();
       base.OnInsert(index, value);
       ((AGaugeLabel)value).SetOwner(Owner);
+      NotifyChanged();
     }
     protected override void OnRemove(int index, object value)
     {
+      NotifyChanging();
       if (Owner != null) Owner.RepaintControl();
+      NotifyChanged();
     }
     protected override void OnClear()
     {
+      NotifyChanging();
       if (Owner != null) Owner.RepaintControl();
+      NotifyChanged();
     }
 
     private string GetUniqueName()
@@ -1594,38 +1677,56 @@ namespace System.Windows.Forms
     System.ComponentModel.Category("Design"),
     System.ComponentModel.DisplayName("(Name)"),
     System.ComponentModel.Description("Instance Name.")]
-    public string Name { get; set; }
+    public string Name { get { return _Name; } set { NotifyChanging(); _Name = value; NotifyChanged(); } }
+    private string _Name;
 
-    private AGauge Owner;
     [System.ComponentModel.Browsable(false)]
     public void SetOwner(AGauge value) { Owner = value; }
+    private AGauge Owner;
+
     private void NotifyOwner() { if (Owner != null) Owner.RepaintControl(); }
+
+    private void NotifyChanging()
+    {
+      if (Owner != null)
+      {
+        Owner.NotifyChanging();
+      }
+    }
+
+    private void NotifyChanged()
+    {
+      if (Owner != null)
+      {
+        Owner.NotifyChanged();
+      }
+    }
 
     [System.ComponentModel.Browsable(true),
     System.ComponentModel.Category("Appearance"),
     System.ComponentModel.Description("The color of the caption text.")]
-    public Color Color { get { return _Color; } set { _Color = value; NotifyOwner(); } }
+    public Color Color { get { return _Color; } set { NotifyChanging(); _Color = value; NotifyOwner(); NotifyChanged();  } }
     private Color _Color = Color.FromKnownColor(KnownColor.WindowText);
 
     [System.ComponentModel.Browsable(true),
     System.ComponentModel.Category("Appearance"),
     System.ComponentModel.Description("The text of the caption.")]
-    public String Text { get { return _Text; } set { _Text = value; NotifyOwner(); } }
+    public String Text { get { return _Text; } set { NotifyChanging(); _Text = value; NotifyOwner(); NotifyChanged(); } }
     private String _Text;
 
     [System.ComponentModel.Browsable(true),
     System.ComponentModel.Category("Appearance"),
     System.ComponentModel.Description("The position of the caption.")]
-    public Point Position { get { return _Position; } set { _Position = value; NotifyOwner(); } }
+    public Point Position { get { return _Position; } set { NotifyChanging(); _Position = value; NotifyOwner(); NotifyChanged(); } }
     private Point _Position;
 
     [System.ComponentModel.Browsable(true),
     System.ComponentModel.Category("Appearance"),
     System.ComponentModel.Description("Font of Text.")]
-    public Font Font { get { return _Font; } set { _Font = value; NotifyOwner(); } }
+    public Font Font { get { return _Font; } set { NotifyChanging(); _Font = value; NotifyOwner(); NotifyChanged(); } }
     private Font _Font = DefaultFont;
 
-    public void ResetFont() { _Font = DefaultFont; }
+    public void ResetFont() { NotifyChanging(); _Font = DefaultFont; NotifyChanged(); }
     private Boolean ShouldSerializeFont() { return (_Font != DefaultFont); }
     private static Font DefaultFont = System.Windows.Forms.Control.DefaultFont;
   }
