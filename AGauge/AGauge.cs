@@ -1257,6 +1257,13 @@ namespace System.Windows.Forms
               clr4 = Color.FromArgb(245 - subcol2, 245 - subcol2, 100 - subcol2);
               e.Graphics.DrawEllipse(Pens.Violet, center.X - needleWidth * 3, center.Y - needleWidth * 3, needleWidth * 6, needleWidth * 6);
               break;
+            case AGaugeNeedleColor.White:
+              clr1 = Color.FromArgb(80 + subcol, 80 + subcol, 80 + subcol);
+              clr2 = Color.FromArgb(255 - subcol, 255 - subcol, 255 - subcol);
+              clr3 = Color.FromArgb(80 + subcol2, 80 + subcol2, 80 + subcol2);
+              clr4 = Color.FromArgb(255 - subcol2, 255 - subcol2, 255 - subcol2);
+              //e.Graphics.DrawEllipse(Pens.Violet, center.X - needleWidth * 3, center.Y - needleWidth * 3, needleWidth * 6, needleWidth * 6);
+              break;
           }
 
           if (Math.Floor((Single)(((brushAngle + 225) % 360) / 180.0)) == 0)
@@ -1347,6 +1354,8 @@ namespace System.Windows.Forms
           return Color.Violet;
         case AGaugeNeedleColor.Magenta:
           return Color.Magenta;
+        case AGaugeNeedleColor.White:
+          return Color.White;
         default:
           Debug.Fail("Missing enumeration");
           return Color.DarkGray;
@@ -1745,7 +1754,8 @@ namespace System.Windows.Forms
     Blue = 3,
     Yellow = 4,
     Violet = 5,
-    Magenta = 6
+    Magenta = 6,
+    White = 7,
   };
 
   public enum NeedleType
