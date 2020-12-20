@@ -25,8 +25,6 @@
 
 namespace System.Windows.Forms
 {
-  #region [ Gauge Enum ]
-
   public enum NeedleType
   {
     Advance,

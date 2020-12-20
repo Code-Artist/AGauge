@@ -27,24 +27,23 @@ using System.Collections;
 
 namespace System.Windows.Forms
 {
-  #region[ Gauge Range ]
   public class AGaugeRangeCollection : CollectionBase
   {
-    private AGauge Owner;
-    public AGaugeRangeCollection(AGauge sender) { Owner = sender; }
+    private AGauge m_Owner;
+    public AGaugeRangeCollection(AGauge sender) { m_Owner = sender; }
     private void NotifyChanging()
     {
-      if (Owner != null)
+      if (m_Owner != null)
       {
-        Owner.NotifyChanging();
+        m_Owner.NotifyChanging(nameof(AGauge.GaugeRanges));
       }
     }
 
     private void NotifyChanged()
     {
-      if (Owner != null)
+      if (m_Owner != null)
       {
-        Owner.NotifyChanged();
+        m_Owner.NotifyChanged(nameof(AGauge.GaugeRanges));
       }
     }
 
@@ -52,23 +51,23 @@ namespace System.Windows.Forms
     public bool Contains(AGaugeRange itemType) { return List.Contains(itemType); }
     public int Add(AGaugeRange itemType)
     {
-      itemType.SetOwner(Owner);
+      itemType.SetOwner(m_Owner);
       if (string.IsNullOrEmpty(itemType.Name)) itemType.Name = GetUniqueName();
       var ret = List.Add(itemType);
-      if (Owner != null) Owner.RepaintControl();
+      if (m_Owner != null) m_Owner.RepaintControl();
       return ret;
     }
     public void Remove(AGaugeRange itemType)
     {
       List.Remove(itemType);
-      if (Owner != null) Owner.RepaintControl();
+      if (m_Owner != null) m_Owner.RepaintControl();
     }
     public void Insert(int index, AGaugeRange itemType)
     {
-      itemType.SetOwner(Owner);
+      itemType.SetOwner(m_Owner);
       if (string.IsNullOrEmpty(itemType.Name)) itemType.Name = GetUniqueName();
       List.Insert(index, itemType);
-      if (Owner != null) Owner.RepaintControl();
+      if (m_Owner != null) m_Owner.RepaintControl();
     }
     public int IndexOf(AGaugeRange itemType) { return List.IndexOf(itemType); }
     public AGaugeRange FindByName(string name)
@@ -80,24 +79,62 @@ namespace System.Windows.Forms
       return null;
     }
 
+    protected override void OnSet(int index, object oldValue, object newValue)
+    {
+      NotifyChanging();
+    }
+
+    protected override void OnSetComplete(int index, object oldValue, object newValue)
+    {
+      m_Owner?.RepaintControl();
+      NotifyChanged();
+    }
+
     protected override void OnInsert(int index, object value)
     {
       NotifyChanging();
-      if (string.IsNullOrEmpty(((AGaugeRange)value).Name)) ((AGaugeRange)value).Name = GetUniqueName();
-      base.OnInsert(index, value);
-      ((AGaugeRange)value).SetOwner(Owner);
+      var Range = (AGaugeRange)value;
+      if (string.IsNullOrEmpty(Range.Name))
+      {
+        Range.Name = GetUniqueName();
+      }
+      Range.SetOwner(m_Owner);
+    }
+
+    protected override void OnInsertComplete(int index, object value)
+    {
+      if (m_Owner != null)
+      {
+        m_Owner.RepaintControl();
+      }
       NotifyChanged();
     }
+
     protected override void OnRemove(int index, object value)
     {
       NotifyChanging();
-      if (Owner != null) Owner.RepaintControl();
+    }
+
+    protected override void OnRemoveComplete(int index, object value)
+    {
+      if (m_Owner != null)
+      {
+        m_Owner.RepaintControl();
+      }
       NotifyChanged();
     }
+
     protected override void OnClear()
     {
       NotifyChanging();
-      if (Owner != null) Owner.RepaintControl();
+    }
+
+    protected override void OnClearComplete()
+    {
+      if (m_Owner != null)
+      {
+        m_Owner.RepaintControl();
+      }
       NotifyChanged();
     }
 

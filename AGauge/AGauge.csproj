@@ -48,8 +48,15 @@
     <Compile Include="AGauge.Designer.cs">
       <DependentUpon>AGauge.cs</DependentUpon>
     </Compile>
+    <Compile Include="AGaugeLabel.cs" />
+    <Compile Include="AGaugeLabelCollection.cs" />
+    <Compile Include="AGaugeNeedleColor.cs" />
+    <Compile Include="AGaugeRange.cs" />
+    <Compile Include="AGaugeRangeCollection.cs" />
     <Compile Include="Categories.cs" />
+    <Compile Include="NeedleType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ValueInRangeChangedEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="AGauge - FxCop.FxCop" />

@@ -955,23 +955,27 @@ namespace System.Windows.Forms
       Refresh();
     }
 
-    internal void NotifyChanging()
+    internal void NotifyChanging(string strPropertyName)
     {
       var ChangeService = (IComponentChangeService)Site?.GetService(typeof(IComponentChangeService));
       if (ChangeService != null)
       {
-        ChangeService.OnComponentChanging(this, null);
+        var pd = TypeDescriptor.GetProperties(this).Find(nameof(strPropertyName), false);
+        ChangeService.OnComponentChanging(this, pd);
       }
     }
 
-    internal void NotifyChanged()
+    internal void NotifyChanged(string strPropertyName)
     {
       var ChangeService = (IComponentChangeService)Site?.GetService(typeof(IComponentChangeService));
       if (ChangeService != null)
       {
-        ChangeService.OnComponentChanged(this, null, null, null);
+        var pd = TypeDescriptor.GetProperties(this).Find(nameof(strPropertyName), false);
+        ChangeService.OnComponentChanged(this, pd, null, null);
       }
     }
+
+
     #endregion
 
     #region Base member overrides
@@ -1435,8 +1439,6 @@ namespace System.Windows.Forms
     #endregion
   }
 
-#region [ EventArgs ]
-  #endregion
 
   [System.Runtime.CompilerServices.CompilerGenerated]
   class NamespaceDoc { } //Namespace Documentation

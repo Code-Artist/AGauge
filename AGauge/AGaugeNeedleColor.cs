@@ -25,11 +25,6 @@
 
 namespace System.Windows.Forms
 {
-  #region [ Gauge Label ]
-  #endregion
-
-  #region [ Gauge Enum ]
-
   /// <summary>
   /// First needle color
   /// </summary>

@@ -27,8 +27,6 @@ using System.Drawing;
 
 namespace System.Windows.Forms
 {
-  #region [ Gauge Label ]
-
   public class AGaugeLabel
   {
     [System.ComponentModel.Browsable(true),
@@ -48,7 +46,7 @@ namespace System.Windows.Forms
     {
       if (Owner != null)
       {
-        Owner.NotifyChanging();
+        Owner.NotifyChanging(nameof(AGauge.GaugeLabels));
       }
     }
 
@@ -56,7 +54,7 @@ namespace System.Windows.Forms
     {
       if (Owner != null)
       {
-        Owner.NotifyChanged();
+        Owner.NotifyChanged(nameof(AGauge.GaugeLabels));
       }
     }
 

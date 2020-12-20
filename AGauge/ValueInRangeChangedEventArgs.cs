@@ -25,11 +25,6 @@
 
 namespace System.Windows.Forms
 {
-  #region [ Gauge Enum ]
-
-  #endregion
-
-  #region [ EventArgs ]
   /// <summary>
   /// Event argument for <see cref="ValueInRangeChanged"/> event.
   /// </summary>

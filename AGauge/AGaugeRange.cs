@@ -27,7 +27,6 @@ using System.Drawing;
 
 namespace System.Windows.Forms
 {
-  #region[ Gauge Range ]
   public class AGaugeRange
   {
     public AGaugeRange() { }
@@ -66,7 +65,7 @@ namespace System.Windows.Forms
     {
       if (Owner != null)
       {
-        Owner.NotifyChanging();
+        Owner.NotifyChanging(nameof(AGauge.GaugeRanges));
       }
     }
 
@@ -74,7 +73,7 @@ namespace System.Windows.Forms
     {
       if (Owner != null)
       {
-        Owner.NotifyChanged();
+        Owner.NotifyChanged(nameof(AGauge.GaugeRanges));
       }
     }
 
