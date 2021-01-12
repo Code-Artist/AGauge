@@ -44,9 +44,18 @@ namespace System.Windows.Forms
   [ToolboxBitmapAttribute(typeof(AGauge), "AGauge.AGauge.bmp"),
   DefaultEvent("ValueInRangeChanged"),
   Description("Displays a value on an analog gauge. Raises an event if the value enters one of the definable ranges.")]
-  public partial class AGauge : Control
+  public partial class AGauge : Control, ISupportInitialize
   {
     #region Private Fields
+
+    /// <summary>
+    /// When initializing we allow <see cref="Value"/> to be outside
+    /// outside the range <see cref="MinValue"/>-<see cref="MaxValue"/>. 
+    /// This ensures that the desired values can be set regardless of 
+    /// the order properties are changed. 
+    /// See <see cref="ISupportInitialize"/>
+    /// </summary>
+    private bool m_bInitializing = false; 
 
     private Single fontBoundY1;
     private Single fontBoundY2;
@@ -207,7 +216,11 @@ namespace System.Windows.Forms
       get { return m_value; }
       set
       {
-        value = Math.Min(Math.Max(value, m_MinValue), m_MaxValue);
+        if (!m_bInitializing)
+        {
+          value = Math.Min(Math.Max(value, m_MinValue), m_MaxValue);
+        }
+
         if (m_value != value)
         {
           m_value = value;
@@ -394,14 +407,20 @@ namespace System.Windows.Forms
       get { return m_MinValue; }
       set
       {
-        if ((m_MinValue != value) && (value < m_MaxValue))
+        m_MinValue = value; 
+        if (m_MinValue > m_MaxValue)
         {
-          m_MinValue = value;
-          m_value = Math.Min(Math.Max(m_value, m_MinValue), m_MaxValue);
-          m_ScaleLinesMajorStepValue = Math.Min(m_ScaleLinesMajorStepValue, m_MaxValue - m_MinValue);
-          drawGaugeBackground = true;
-          Refresh();
+          m_MaxValue = value;
         }
+
+        if (!m_bInitializing)
+        {
+          Value = Constrain(m_value);
+        }
+
+        m_ScaleLinesMajorStepValue = Math.Min(m_ScaleLinesMajorStepValue, m_MaxValue - m_MinValue);
+        drawGaugeBackground = true;
+        Refresh();
       }
     }
 
@@ -414,14 +433,20 @@ namespace System.Windows.Forms
       get { return m_MaxValue; }
       set
       {
-        if ((m_MaxValue != value) && (value > m_MinValue))
+        m_MaxValue = value;
+        if (m_MaxValue < m_MinValue)
         {
-          m_MaxValue = value;
-          m_value = Math.Min(Math.Max(m_value, m_MinValue), m_MaxValue);
-          m_ScaleLinesMajorStepValue = Math.Min(m_ScaleLinesMajorStepValue, m_MaxValue - m_MinValue);
-          drawGaugeBackground = true;
-          Refresh();
+          m_MinValue = value;
         }
+
+        if (!m_bInitializing)
+        {
+          Value = Constrain(m_value);
+        }
+
+        m_ScaleLinesMajorStepValue = Math.Min(m_ScaleLinesMajorStepValue, m_MaxValue - m_MinValue);
+        drawGaugeBackground = true;
+        Refresh();
       }
     }
 
@@ -1435,6 +1460,33 @@ namespace System.Windows.Forms
     {
       drawGaugeBackground = true;
       Refresh();
+    }
+
+    public void BeginInit()
+    {
+      m_bInitializing = true; 
+    }
+
+    public void EndInit()
+    {
+      m_bInitializing = false;
+      if (Value < MinValue || Value > MaxValue)
+      {
+        Value = Constrain(m_value);
+      }
+    }
+
+    private float Constrain(float fCurrentValue)
+    {
+      if (fCurrentValue < MinValue)
+      {
+        return MinValue;
+      }
+      if (fCurrentValue > MaxValue)
+      {
+        return MaxValue;
+      }
+      return fCurrentValue;
     }
     #endregion
   }
