@@ -5,3 +5,6 @@ http://www.codearteng.com/2012/08/agauge-winforms-gauge-control.html
 
 The latest binary package had been published to NuGet Package Gallery named "AGauge V2".<br/>
 https://www.nuget.org/packages/AGauge_V2/2.0.2
+
+## More Gauge Control
+Check out WinForm Gauge at https://winformgauge.codearteng.com, high performance .NET Windows Form Gauge for info-graphics and real-time dashboard.
