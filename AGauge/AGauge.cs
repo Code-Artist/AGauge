@@ -268,6 +268,8 @@ namespace System.Windows.Forms
       set
       {
         base.AutoSize = value;
+        drawGaugeBackground = true;
+        Refresh();
       }
     }
 
