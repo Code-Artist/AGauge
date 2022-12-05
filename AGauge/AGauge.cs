@@ -33,6 +33,7 @@ using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.Diagnostics;
 using System.Collections;
+using System.ComponentModel.Design;
 
 namespace System.Windows.Forms
 {
@@ -43,9 +44,18 @@ namespace System.Windows.Forms
   [ToolboxBitmapAttribute(typeof(AGauge), "AGauge.AGauge.bmp"),
   DefaultEvent("ValueInRangeChanged"),
   Description("Displays a value on an analog gauge. Raises an event if the value enters one of the definable ranges.")]
-  public partial class AGauge : Control
+  public partial class AGauge : Control, ISupportInitialize
   {
     #region Private Fields
+
+    /// <summary>
+    /// When initializing we allow <see cref="Value"/> to be outside
+    /// outside the range <see cref="MinValue"/>-<see cref="MaxValue"/>. 
+    /// This ensures that the desired values can be set regardless of 
+    /// the order properties are changed. 
+    /// See <see cref="ISupportInitialize"/>
+    /// </summary>
+    private bool m_bInitializing = false; 
 
     private Single fontBoundY1;
     private Single fontBoundY2;
@@ -53,46 +63,78 @@ namespace System.Windows.Forms
     private Boolean drawGaugeBackground = true;
 
     private Single m_value;
-    //private Boolean m_AutoSize = false;
     private Point m_Center = new Point(100, 100);
-    private Single m_MinValue = -100;
-    private Single m_MaxValue = 400;
+    private Single m_MinValue = m_DefaultMinValue;
+    private Single m_MaxValue = m_DefaultMaxValue;
+
+    private const Single m_DefaultMinValue = -100;
+    private const Single m_DefaultMaxValue = 400;
+
+    private const Int32 m_DefaultBaseArcRadius = 80;
+    private const Int32 m_DefaultBaseArcStart = 135;
+    private const Int32 m_DefaultBaseArcSweep = 270;
+    private const Int32 m_DefaultBaseArcWidth = 2;
+
+    private const Int32 m_DefaultScaleLinesInterInnerRadius = 73;
+    private const Int32 m_DefaultScaleLinesInterOuterRadius = 80;
+    private const Int32 m_DefaultScaleLinesInterWidth = 1;
+
+    private const Int32 m_DefaultScaleLinesMinorTicks = 9;
+    private const Int32 m_DefaultScaleLinesMinorInnerRadius = 75;
+    private const Int32 m_DefaultScaleLinesMinorOuterRadius = 80;
+    private const Int32 m_DefaultScaleLinesMinorWidth = 1;
+
+    private const Single m_DefaultScaleLinesMajorStepValue = 50.0f;
+    private const Int32 m_DefaultScaleLinesMajorInnerRadius = 70;
+    private const Int32 m_DefaultScaleLinesMajorOuterRadius = 80;
+    private const Int32 m_DefaultScaleLinesMajorWidth = 2;
 
     private Color m_BaseArcColor = Color.Gray;
-    private Int32 m_BaseArcRadius = 80;
-    private Int32 m_BaseArcStart = 135;
-    private Int32 m_BaseArcSweep = 270;
-    private Int32 m_BaseArcWidth = 2;
+    private Int32 m_BaseArcRadius = m_DefaultBaseArcRadius;
+    private Int32 m_BaseArcStart = m_DefaultBaseArcStart;
+    private Int32 m_BaseArcSweep = m_DefaultBaseArcSweep;
+    private Int32 m_BaseArcWidth = m_DefaultBaseArcWidth;
 
     private Color m_ScaleLinesInterColor = Color.Black;
-    private Int32 m_ScaleLinesInterInnerRadius = 73;
-    private Int32 m_ScaleLinesInterOuterRadius = 80;
-    private Int32 m_ScaleLinesInterWidth = 1;
+    private Int32 m_ScaleLinesInterInnerRadius = m_DefaultScaleLinesInterInnerRadius;
+    private Int32 m_ScaleLinesInterOuterRadius = m_DefaultScaleLinesInterOuterRadius;
+    private Int32 m_ScaleLinesInterWidth = m_DefaultScaleLinesInterWidth;
 
-    private Int32 m_ScaleLinesMinorTicks = 9;
+    private Int32 m_ScaleLinesMinorTicks = m_DefaultScaleLinesMinorTicks;
     private Color m_ScaleLinesMinorColor = Color.Gray;
-    private Int32 m_ScaleLinesMinorInnerRadius = 75;
-    private Int32 m_ScaleLinesMinorOuterRadius = 80;
-    private Int32 m_ScaleLinesMinorWidth = 1;
+    private Int32 m_ScaleLinesMinorInnerRadius = m_DefaultScaleLinesMinorInnerRadius;
+    private Int32 m_ScaleLinesMinorOuterRadius = m_DefaultScaleLinesMinorOuterRadius;
+    private Int32 m_ScaleLinesMinorWidth = m_DefaultScaleLinesMinorWidth;
 
-    private Single m_ScaleLinesMajorStepValue = 50.0f;
+    private Single m_ScaleLinesMajorStepValue = m_DefaultScaleLinesMajorStepValue;
     private Color m_ScaleLinesMajorColor = Color.Black;
-    private Int32 m_ScaleLinesMajorInnerRadius = 70;
-    private Int32 m_ScaleLinesMajorOuterRadius = 80;
-    private Int32 m_ScaleLinesMajorWidth = 2;
+    private Int32 m_ScaleLinesMajorInnerRadius = m_DefaultScaleLinesMajorInnerRadius;
+    private Int32 m_ScaleLinesMajorOuterRadius = m_DefaultScaleLinesMajorOuterRadius;
+    private Int32 m_ScaleLinesMajorWidth = m_DefaultScaleLinesMajorWidth;
 
-    private Int32 m_ScaleNumbersRadius = 95;
+    private const Int32 m_DefaultScaleNumbersRadius = 95;
+    private const Int32 m_DefaultScaleNumbersStepScaleLines = 1;
+    private const Int32 m_DefaultScaleNumbersRotation = 0;
+    private const Int32 m_DefaultScaleNumbersStartScaleLine = 1;
+
+    private Int32 m_ScaleNumbersRadius = m_DefaultScaleNumbersRadius;
     private Color m_ScaleNumbersColor = Color.Black;
-    private String m_ScaleNumbersFormat;
-    private Int32 m_ScaleNumbersStartScaleLine;
-    private Int32 m_ScaleNumbersStepScaleLines = 1;
-    private Int32 m_ScaleNumbersRotation;
+    private String m_ScaleNumbersFormat = string.Empty;
+    private Int32 m_ScaleNumbersStartScaleLine = m_DefaultScaleNumbersStartScaleLine;
+    private Int32 m_ScaleNumbersStepScaleLines = m_DefaultScaleNumbersStepScaleLines;
+    private Int32 m_ScaleNumbersRotation = m_DefaultScaleNumbersRotation;
 
-    private NeedleType m_NeedleType;
-    private Int32 m_NeedleRadius = 80;
-    private AGaugeNeedleColor m_NeedleColor1 = AGaugeNeedleColor.Gray;
+
+    private const NeedleType m_DefaultNeedleType = NeedleType.Advance;
+    private const Int32 m_DefaultNeedleRadius = 80;
+    private const AGaugeNeedleColor m_DefaultNeedleColor1 = AGaugeNeedleColor.Gray;
+    private const Int32 m_DefaultNeedleWidth = 2;
+
+    private NeedleType m_NeedleType = m_DefaultNeedleType;
+    private Int32 m_NeedleRadius = m_DefaultNeedleRadius;
+    private AGaugeNeedleColor m_NeedleColor1 = m_DefaultNeedleColor1;
     private Color m_NeedleColor2 = Color.DimGray;
-    private Int32 m_NeedleWidth = 2;
+    private Int32 m_NeedleWidth = m_DefaultNeedleWidth;
 
     #endregion
 
@@ -167,14 +209,18 @@ namespace System.Windows.Forms
 
     #region Properties  
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Data),
     System.ComponentModel.Description("Gauge value.")]
     public Single Value
     {
       get { return m_value; }
       set
       {
-        value = Math.Min(Math.Max(value, m_MinValue), m_MaxValue);
+        if (!m_bInitializing)
+        {
+          value = Math.Min(Math.Max(value, m_MinValue), m_MaxValue);
+        }
+
         if (m_value != value)
         {
           m_value = value;
@@ -210,8 +256,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    System.ComponentModel.Category(Categories.Appearance),
     System.ComponentModel.Description("Auto size Mode of the gauge.")]
+    [DefaultValue(false)]
     public Boolean GaugeAutoSize
     {
       get
@@ -221,18 +268,20 @@ namespace System.Windows.Forms
       set
       {
         base.AutoSize = value;
+        drawGaugeBackground = true;
+        Refresh();
       }
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    System.ComponentModel.Category(Categories.Appearance),
     System.ComponentModel.Description("Gauge Ranges.")]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
     public AGaugeRangeCollection GaugeRanges { get { return _GaugeRanges; } }
     private AGaugeRangeCollection _GaugeRanges;
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    System.ComponentModel.Category(Categories.Appearance),
     System.ComponentModel.Description("Gauge Labels.")]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
     public AGaugeLabelCollection GaugeLabels { get { return _GaugeLabels; } }
@@ -240,7 +289,7 @@ namespace System.Windows.Forms
 
     #region << Gauge Base >>
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    System.ComponentModel.Category(Categories.Appearance),
     System.ComponentModel.Description("The center of the gauge (in the control's client area)."),
     System.ComponentModel.DefaultValue(typeof(Point), "100, 100")]
     public Point Center
@@ -258,8 +307,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Colors),
     System.ComponentModel.Description("The color of the base arc.")]
+    [DefaultValue(typeof(Color), nameof(Color.Gray))]
     public Color BaseArcColor
     {
       get { return m_BaseArcColor; }
@@ -275,8 +325,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Scale),
     System.ComponentModel.Description("The radius of the base arc.")]
+    [DefaultValue(m_DefaultBaseArcRadius)]
     public Int32 BaseArcRadius
     {
       get { return m_BaseArcRadius; }
@@ -292,8 +343,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Scale),
     System.ComponentModel.Description("The start angle of the base arc.")]
+    [DefaultValue(m_DefaultBaseArcStart)]
     public Int32 BaseArcStart
     {
       get { return m_BaseArcStart; }
@@ -309,8 +361,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Scale),
     System.ComponentModel.Description("The sweep angle of the base arc.")]
+    [DefaultValue(m_DefaultBaseArcSweep)]
     public Int32 BaseArcSweep
     {
       get { return m_BaseArcSweep; }
@@ -326,8 +379,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Scale),
     System.ComponentModel.Description("The width of the base arc.")]
+    [DefaultValue(m_DefaultBaseArcWidth)]
     public Int32 BaseArcWidth
     {
       get { return m_BaseArcWidth; }
@@ -347,46 +401,61 @@ namespace System.Windows.Forms
     #region << Gauge Scale >>
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Data),
     System.ComponentModel.Description("The minimum value to show on the scale.")]
+    [DefaultValue(m_DefaultMinValue)]
     public Single MinValue
     {
       get { return m_MinValue; }
       set
       {
-        if ((m_MinValue != value) && (value < m_MaxValue))
+        m_MinValue = value; 
+        if (m_MinValue > m_MaxValue)
         {
-          m_MinValue = value;
-          m_value = Math.Min(Math.Max(m_value, m_MinValue), m_MaxValue);
-          m_ScaleLinesMajorStepValue = Math.Min(m_ScaleLinesMajorStepValue, m_MaxValue - m_MinValue);
-          drawGaugeBackground = true;
-          Refresh();
+          m_MaxValue = value;
         }
+
+        if (!m_bInitializing)
+        {
+          Value = Constrain(m_value);
+        }
+
+        m_ScaleLinesMajorStepValue = Math.Min(m_ScaleLinesMajorStepValue, m_MaxValue - m_MinValue);
+        drawGaugeBackground = true;
+        Refresh();
       }
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Data),
     System.ComponentModel.Description("The maximum value to show on the scale.")]
+    [DefaultValue(m_DefaultMaxValue)]
     public Single MaxValue
     {
       get { return m_MaxValue; }
       set
       {
-        if ((m_MaxValue != value) && (value > m_MinValue))
+        m_MaxValue = value;
+        if (m_MaxValue < m_MinValue)
         {
-          m_MaxValue = value;
-          m_value = Math.Min(Math.Max(m_value, m_MinValue), m_MaxValue);
-          m_ScaleLinesMajorStepValue = Math.Min(m_ScaleLinesMajorStepValue, m_MaxValue - m_MinValue);
-          drawGaugeBackground = true;
-          Refresh();
+          m_MinValue = value;
         }
+
+        if (!m_bInitializing)
+        {
+          Value = Constrain(m_value);
+        }
+
+        m_ScaleLinesMajorStepValue = Math.Min(m_ScaleLinesMajorStepValue, m_MaxValue - m_MinValue);
+        drawGaugeBackground = true;
+        Refresh();
       }
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Colors),
     System.ComponentModel.Description("The color of the inter scale lines which are the middle scale lines for an uneven number of minor scale lines.")]
+    [DefaultValue(typeof(Color), "Black")]
     public Color ScaleLinesInterColor
     {
       get { return m_ScaleLinesInterColor; }
@@ -402,8 +471,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Scale),
     System.ComponentModel.Description("The inner radius of the inter scale lines which are the middle scale lines for an uneven number of minor scale lines.")]
+    [DefaultValue(m_DefaultScaleLinesInterInnerRadius)]
     public Int32 ScaleLinesInterInnerRadius
     {
       get { return m_ScaleLinesInterInnerRadius; }
@@ -419,8 +489,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Scale),
     System.ComponentModel.Description("The outer radius of the inter scale lines which are the middle scale lines for an uneven number of minor scale lines.")]
+    [DefaultValue(m_DefaultScaleLinesInterOuterRadius)]
     public Int32 ScaleLinesInterOuterRadius
     {
       get { return m_ScaleLinesInterOuterRadius; }
@@ -436,8 +507,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Scale),
     System.ComponentModel.Description("The width of the inter scale lines which are the middle scale lines for an uneven number of minor scale lines.")]
+    [DefaultValue(m_DefaultScaleLinesInterWidth)]
     public Int32 ScaleLinesInterWidth
     {
       get { return m_ScaleLinesInterWidth; }
@@ -453,8 +525,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Scale),
     System.ComponentModel.Description("The number of minor scale lines.")]
+    [DefaultValue(m_DefaultScaleLinesMinorTicks)]
     public Int32 ScaleLinesMinorTicks
     {
       get { return m_ScaleLinesMinorTicks; }
@@ -470,8 +543,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Colors),
     System.ComponentModel.Description("The color of the minor scale lines.")]
+    [DefaultValue(typeof(Color), "Gray")]
     public Color ScaleLinesMinorColor
     {
       get { return m_ScaleLinesMinorColor; }
@@ -487,8 +561,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Scale),
     System.ComponentModel.Description("The inner radius of the minor scale lines.")]
+    [DefaultValue(m_DefaultScaleLinesMinorInnerRadius)]
     public Int32 ScaleLinesMinorInnerRadius
     {
       get { return m_ScaleLinesMinorInnerRadius; }
@@ -504,8 +579,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Scale),
     System.ComponentModel.Description("The outer radius of the minor scale lines.")]
+    [DefaultValue(m_DefaultScaleLinesMinorOuterRadius)]
     public Int32 ScaleLinesMinorOuterRadius
     {
       get { return m_ScaleLinesMinorOuterRadius; }
@@ -521,8 +597,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Scale),
     System.ComponentModel.Description("The width of the minor scale lines.")]
+    [DefaultValue(m_DefaultScaleLinesMinorWidth)]
     public Int32 ScaleLinesMinorWidth
     {
       get { return m_ScaleLinesMinorWidth; }
@@ -538,8 +615,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Scale),
     System.ComponentModel.Description("The step value of the major scale lines.")]
+    [DefaultValue(m_DefaultScaleLinesMajorStepValue)]
     public Single ScaleLinesMajorStepValue
     {
       get { return m_ScaleLinesMajorStepValue; }
@@ -555,8 +633,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Colors),
     System.ComponentModel.Description("The color of the major scale lines.")]
+    [DefaultValue(typeof(Color), "Black")]
     public Color ScaleLinesMajorColor
     {
       get { return m_ScaleLinesMajorColor; }
@@ -572,8 +651,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Scale),
     System.ComponentModel.Description("The inner radius of the major scale lines.")]
+    [DefaultValue(m_DefaultScaleLinesMajorInnerRadius)]
     public Int32 ScaleLinesMajorInnerRadius
     {
       get { return m_ScaleLinesMajorInnerRadius; }
@@ -589,8 +669,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Scale),
     System.ComponentModel.Description("The outer radius of the major scale lines.")]
+    [DefaultValue(m_DefaultScaleLinesMajorOuterRadius)]
     public Int32 ScaleLinesMajorOuterRadius
     {
       get { return m_ScaleLinesMajorOuterRadius; }
@@ -606,8 +687,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Scale),
     System.ComponentModel.Description("The width of the major scale lines.")]
+    [DefaultValue(m_DefaultScaleLinesMajorWidth)]
     public Int32 ScaleLinesMajorWidth
     {
       get { return m_ScaleLinesMajorWidth; }
@@ -627,8 +709,9 @@ namespace System.Windows.Forms
     #region << Gauge Scale Numbers >>
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Labels),
     System.ComponentModel.Description("The radius of the scale numbers.")]
+    [DefaultValue(m_DefaultScaleNumbersRadius)]
     public Int32 ScaleNumbersRadius
     {
       get { return m_ScaleNumbersRadius; }
@@ -644,8 +727,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Colors),
     System.ComponentModel.Description("The color of the scale numbers.")]
+    [DefaultValue(typeof(Color), "Black")]
     public Color ScaleNumbersColor
     {
       get { return m_ScaleNumbersColor; }
@@ -661,8 +745,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Labels),
     System.ComponentModel.Description("The format of the scale numbers.")]
+    [DefaultValue("")]
     public String ScaleNumbersFormat
     {
       get { return m_ScaleNumbersFormat; }
@@ -678,8 +763,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Labels),
     System.ComponentModel.Description("The number of the scale line to start writing numbers next to.")]
+    [DefaultValue(m_DefaultScaleNumbersStartScaleLine)]
     public Int32 ScaleNumbersStartScaleLine
     {
       get { return m_ScaleNumbersStartScaleLine; }
@@ -695,8 +781,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Labels),
     System.ComponentModel.Description("The number of scale line steps for writing numbers.")]
+    [DefaultValue(m_DefaultScaleNumbersStepScaleLines)]
     public Int32 ScaleNumbersStepScaleLines
     {
       get { return m_ScaleNumbersStepScaleLines; }
@@ -712,8 +799,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Labels),
     System.ComponentModel.Description("The angle relative to the tangent of the base arc at a scale line that is used to rotate numbers. set to 0 for no rotation or e.g. set to 90.")]
+    [DefaultValue(m_DefaultScaleNumbersRotation)]
     public Int32 ScaleNumbersRotation
     {
       get { return m_ScaleNumbersRotation; }
@@ -733,8 +821,9 @@ namespace System.Windows.Forms
     #region << Gauge Needle >>
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Needle),
     System.ComponentModel.Description("The type of the needle, currently only type 0 and 1 are supported. Type 0 looks nicers but if you experience performance problems you might consider using type 1.")]
+    [DefaultValue(typeof(NeedleType), nameof(NeedleType.Advance))]
     public NeedleType NeedleType
     {
       get { return m_NeedleType; }
@@ -750,8 +839,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Needle),
     System.ComponentModel.Description("The radius of the needle.")]
+    [DefaultValue(m_DefaultNeedleRadius)]
     public Int32 NeedleRadius
     {
       get { return m_NeedleRadius; }
@@ -767,8 +857,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Colors),
     System.ComponentModel.Description("The first color of the needle.")]
+    [DefaultValue(typeof(AGaugeNeedleColor), nameof(AGaugeNeedleColor.Gray))]
     public AGaugeNeedleColor NeedleColor1
     {
       get { return m_NeedleColor1; }
@@ -784,8 +875,9 @@ namespace System.Windows.Forms
     }
 
     [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
+    Category(Categories.Colors),
     System.ComponentModel.Description("The second color of the needle.")]
+    [DefaultValue(typeof(Color), nameof(Color.DimGray))]
     public Color NeedleColor2
     {
       get { return m_NeedleColor2; }
@@ -800,9 +892,10 @@ namespace System.Windows.Forms
       }
     }
 
-    [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("AGauge"),
-    System.ComponentModel.Description("The width of the needle.")]
+    [Browsable(true),
+    Category(Categories.Needle),
+    Description("The width of the needle.")]
+    [DefaultValue(m_DefaultNeedleWidth)]
     public Int32 NeedleWidth
     {
       get { return m_NeedleWidth; }
@@ -888,6 +981,27 @@ namespace System.Windows.Forms
       drawGaugeBackground = true;
       Refresh();
     }
+
+    internal void NotifyChanging(string strPropertyName)
+    {
+      var ChangeService = (IComponentChangeService)Site?.GetService(typeof(IComponentChangeService));
+      if (ChangeService != null)
+      {
+        var pd = TypeDescriptor.GetProperties(this).Find(nameof(strPropertyName), false);
+        ChangeService.OnComponentChanging(this, pd);
+      }
+    }
+
+    internal void NotifyChanged(string strPropertyName)
+    {
+      var ChangeService = (IComponentChangeService)Site?.GetService(typeof(IComponentChangeService));
+      if (ChangeService != null)
+      {
+        var pd = TypeDescriptor.GetProperties(this).Find(nameof(strPropertyName), false);
+        ChangeService.OnComponentChanged(this, pd, null, null);
+      }
+    }
+
 
     #endregion
 
@@ -1239,6 +1353,13 @@ namespace System.Windows.Forms
               clr4 = Color.FromArgb(245 - subcol2, 245 - subcol2, 100 - subcol2);
               e.Graphics.DrawEllipse(Pens.Violet, center.X - needleWidth * 3, center.Y - needleWidth * 3, needleWidth * 6, needleWidth * 6);
               break;
+            case AGaugeNeedleColor.White:
+              clr1 = Color.FromArgb(80 + subcol, 80 + subcol, 80 + subcol);
+              clr2 = Color.FromArgb(255 - subcol, 255 - subcol, 255 - subcol);
+              clr3 = Color.FromArgb(80 + subcol2, 80 + subcol2, 80 + subcol2);
+              clr4 = Color.FromArgb(255 - subcol2, 255 - subcol2, 255 - subcol2);
+              //e.Graphics.DrawEllipse(Pens.Violet, center.X - needleWidth * 3, center.Y - needleWidth * 3, needleWidth * 6, needleWidth * 6);
+              break;
           }
 
           if (Math.Floor((Single)(((brushAngle + 225) % 360) / 180.0)) == 0)
@@ -1329,6 +1450,8 @@ namespace System.Windows.Forms
           return Color.Violet;
         case AGaugeNeedleColor.Magenta:
           return Color.Magenta;
+        case AGaugeNeedleColor.White:
+          return Color.White;
         default:
           Debug.Fail("Missing enumeration");
           return Color.DarkGray;
@@ -1340,347 +1463,36 @@ namespace System.Windows.Forms
       drawGaugeBackground = true;
       Refresh();
     }
+
+    public void BeginInit()
+    {
+      m_bInitializing = true; 
+    }
+
+    public void EndInit()
+    {
+      m_bInitializing = false;
+      if (Value < MinValue || Value > MaxValue)
+      {
+        Value = Constrain(m_value);
+      }
+    }
+
+    private float Constrain(float fCurrentValue)
+    {
+      if (fCurrentValue < MinValue)
+      {
+        return MinValue;
+      }
+      if (fCurrentValue > MaxValue)
+      {
+        return MaxValue;
+      }
+      return fCurrentValue;
+    }
     #endregion
   }
 
-  #region[ Gauge Range ]
-  public class AGaugeRangeCollection : CollectionBase
-  {
-    private AGauge Owner;
-    public AGaugeRangeCollection(AGauge sender) { Owner = sender; }
-
-    public AGaugeRange this[int index] { get { return (AGaugeRange)List[index]; } }
-    public bool Contains(AGaugeRange itemType) { return List.Contains(itemType); }
-    public int Add(AGaugeRange itemType)
-    {
-      itemType.SetOwner(Owner);
-      if (string.IsNullOrEmpty(itemType.Name)) itemType.Name = GetUniqueName();
-      var ret = List.Add(itemType);
-      if (Owner != null) Owner.RepaintControl();
-      return ret;
-    }
-    public void Remove(AGaugeRange itemType)
-    {
-      List.Remove(itemType);
-      if (Owner != null) Owner.RepaintControl();
-    }
-    public void Insert(int index, AGaugeRange itemType)
-    {
-      itemType.SetOwner(Owner);
-      if (string.IsNullOrEmpty(itemType.Name)) itemType.Name = GetUniqueName();
-      List.Insert(index, itemType);
-      if (Owner != null) Owner.RepaintControl();
-    }
-    public int IndexOf(AGaugeRange itemType) { return List.IndexOf(itemType); }
-    public AGaugeRange FindByName(string name)
-    {
-      foreach (AGaugeRange ptrRange in List)
-      {
-        if (ptrRange.Name == name) return ptrRange;
-      }
-      return null;
-    }
-
-    protected override void OnInsert(int index, object value)
-    {
-      if (string.IsNullOrEmpty(((AGaugeRange)value).Name)) ((AGaugeRange)value).Name = GetUniqueName();
-      base.OnInsert(index, value);
-      ((AGaugeRange)value).SetOwner(Owner);
-    }
-    protected override void OnRemove(int index, object value)
-    {
-      if (Owner != null) Owner.RepaintControl();
-    }
-    protected override void OnClear()
-    {
-      if (Owner != null) Owner.RepaintControl();
-    }
-
-    private string GetUniqueName()
-    {
-      const string Prefix = "GaugeRange";
-      int index = 1;
-      bool valid;
-      while (this.Count != 0)
-      {
-        valid = true;
-        for (int x = 0; x < this.Count; x++)
-        {
-          if (this[x].Name == (Prefix + index.ToString()))
-          {
-            valid = false;
-            break;
-          }
-        }
-        if (valid) break;
-        index++;
-      };
-      return Prefix + index.ToString();
-    }
-  }
-  public class AGaugeRange
-  {
-    public AGaugeRange() { }
-
-    public AGaugeRange(Color color, Single startValue, Single endValue)
-    {
-      Color = color;
-      _StartValue = startValue;
-      _EndValue = endValue;
-    }
-
-    public AGaugeRange(Color color, Single startValue, Single endValue, Int32 innerRadius, Int32 outerRadius)
-    {
-      Color = color;
-      _StartValue = startValue;
-      _EndValue = endValue;
-      InnerRadius = innerRadius;
-      OuterRadius = outerRadius;
-    }
-
-    [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("Design"),
-    System.ComponentModel.DisplayName("(Name)"),
-    System.ComponentModel.Description("Instance Name.")]
-    public string Name { get; set; }
-
-    [System.ComponentModel.Browsable(false)]
-    public Boolean InRange { get; set; }
-
-    private AGauge Owner;
-    [System.ComponentModel.Browsable(false)]
-    public void SetOwner(AGauge value) { Owner = value; }
-    private void NotifyOwner() { if (Owner != null) Owner.RepaintControl(); }
-
-    [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("Appearance"),
-    System.ComponentModel.Description("The color of the range.")]
-    public Color Color { get { return _Color; } set { _Color = value; NotifyOwner(); } }
-    private Color _Color;
-
-    [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("Limits"),
-    System.ComponentModel.Description("The start value of the range, must be less than RangeEndValue.")]
-    public Single StartValue
-    {
-      get { return _StartValue; }
-      set
-      {
-        if (Owner != null)
-        {
-          if (value < Owner.MinValue) value = Owner.MinValue;
-          if (value > Owner.MaxValue) value = Owner.MaxValue;
-        }
-        _StartValue = value; NotifyOwner();
-      }
-    }
-    private Single _StartValue;
-
-    [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("Limits"),
-    System.ComponentModel.Description("The end value of the range. Must be greater than RangeStartValue.")]
-    public Single EndValue
-    {
-      get { return _EndValue; }
-      set
-      {
-        if (Owner != null)
-        {
-          if (value < Owner.MinValue) value = Owner.MinValue;
-          if (value > Owner.MaxValue) value = Owner.MaxValue;
-        }
-        _EndValue = value; NotifyOwner();
-      }
-    }
-    private Single _EndValue;
-
-    [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("Appearance"),
-    System.ComponentModel.Description("The inner radius of the range.")]
-    public Int32 InnerRadius
-    {
-      get { return _InnerRadius; }
-      set { if (value > 0) { _InnerRadius = value; NotifyOwner(); } }
-    }
-    private Int32 _InnerRadius = 70;
-
-    [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("Appearance"),
-    System.ComponentModel.Description("The outer radius of the range.")]
-    public Int32 OuterRadius
-    {
-      get { return _OuterRadius; }
-      set { if (value > 0) { _OuterRadius = value; NotifyOwner(); } }
-    }
-    private Int32 _OuterRadius = 80;
-  }
-  #endregion
-
-  #region [ Gauge Label ]
-  public class AGaugeLabelCollection : CollectionBase
-  {
-    private AGauge Owner;
-    public AGaugeLabelCollection(AGauge sender) { Owner = sender; }
-
-    public AGaugeLabel this[int index] { get { return (AGaugeLabel)List[index]; } }
-    public bool Contains(AGaugeLabel itemType) { return List.Contains(itemType); }
-    public int Add(AGaugeLabel itemType)
-    {
-      itemType.SetOwner(Owner);
-      if (string.IsNullOrEmpty(itemType.Name)) itemType.Name = GetUniqueName();
-      var ret = List.Add(itemType);
-      if (Owner != null) Owner.RepaintControl();
-      return ret;
-    }
-    public void Remove(AGaugeLabel itemType)
-    {
-      List.Remove(itemType);
-      if (Owner != null) Owner.RepaintControl();
-    }
-    public void Insert(int index, AGaugeLabel itemType)
-    {
-      itemType.SetOwner(Owner);
-      if (string.IsNullOrEmpty(itemType.Name)) itemType.Name = GetUniqueName();
-      List.Insert(index, itemType);
-      if (Owner != null) Owner.RepaintControl();
-    }
-    public int IndexOf(AGaugeLabel itemType) { return List.IndexOf(itemType); }
-    public AGaugeLabel FindByName(string name)
-    {
-      foreach (AGaugeLabel ptrRange in List)
-      {
-        if (ptrRange.Name == name) return ptrRange;
-      }
-      return null;
-    }
-
-    protected override void OnInsert(int index, object value)
-    {
-      if (string.IsNullOrEmpty(((AGaugeLabel)value).Name)) ((AGaugeLabel)value).Name = GetUniqueName();
-      base.OnInsert(index, value);
-      ((AGaugeLabel)value).SetOwner(Owner);
-    }
-    protected override void OnRemove(int index, object value)
-    {
-      if (Owner != null) Owner.RepaintControl();
-    }
-    protected override void OnClear()
-    {
-      if (Owner != null) Owner.RepaintControl();
-    }
-
-    private string GetUniqueName()
-    {
-      const string Prefix = "GaugeLabel";
-      int index = 1;
-      while (this.Count != 0)
-      {
-        for (int x = 0; x < this.Count; x++)
-        {
-          if (this[x].Name == (Prefix + index.ToString()))
-            continue;
-          else
-            return Prefix + index.ToString();
-        }
-        index++;
-      };
-      return Prefix + index.ToString();
-    }
-  }
-
-  public class AGaugeLabel
-  {
-    [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("Design"),
-    System.ComponentModel.DisplayName("(Name)"),
-    System.ComponentModel.Description("Instance Name.")]
-    public string Name { get; set; }
-
-    private AGauge Owner;
-    [System.ComponentModel.Browsable(false)]
-    public void SetOwner(AGauge value) { Owner = value; }
-    private void NotifyOwner() { if (Owner != null) Owner.RepaintControl(); }
-
-    [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("Appearance"),
-    System.ComponentModel.Description("The color of the caption text.")]
-    public Color Color { get { return _Color; } set { _Color = value; NotifyOwner(); } }
-    private Color _Color = Color.FromKnownColor(KnownColor.WindowText);
-
-    [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("Appearance"),
-    System.ComponentModel.Description("The text of the caption.")]
-    public String Text { get { return _Text; } set { _Text = value; NotifyOwner(); } }
-    private String _Text;
-
-    [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("Appearance"),
-    System.ComponentModel.Description("The position of the caption.")]
-    public Point Position { get { return _Position; } set { _Position = value; NotifyOwner(); } }
-    private Point _Position;
-
-    [System.ComponentModel.Browsable(true),
-    System.ComponentModel.Category("Appearance"),
-    System.ComponentModel.Description("Font of Text.")]
-    public Font Font { get { return _Font; } set { _Font = value; NotifyOwner(); } }
-    private Font _Font = DefaultFont;
-
-    public void ResetFont() { _Font = DefaultFont; }
-    private Boolean ShouldSerializeFont() { return (_Font != DefaultFont); }
-    private static Font DefaultFont = System.Windows.Forms.Control.DefaultFont;
-  }
-  #endregion
-
-  #region [ Gauge Enum ]
-
-  /// <summary>
-  /// First needle color
-  /// </summary>
-  public enum AGaugeNeedleColor
-  {
-    Gray = 0,
-    Red = 1,
-    Green = 2,
-    Blue = 3,
-    Yellow = 4,
-    Violet = 5,
-    Magenta = 6
-  };
-
-  public enum NeedleType
-  {
-    Advance,
-    Simple
-  }
-
-  #endregion
-
-  #region [ EventArgs ]
-  /// <summary>
-  /// Event argument for <see cref="ValueInRangeChanged"/> event.
-  /// </summary>
-  public class ValueInRangeChangedEventArgs : EventArgs
-  {
-    /// <summary>
-    /// Affected GaugeRange
-    /// </summary>
-    public AGaugeRange Range { get; private set; }
-    /// <summary>
-    /// Gauge Value
-    /// </summary>
-    public Single Value { get; private set; }
-    /// <summary>
-    /// True if value is within current range.
-    /// </summary>
-    public bool InRange { get; private set; }
-    public ValueInRangeChangedEventArgs(AGaugeRange range, Single value, bool inRange)
-    {
-      this.Range = range;
-      this.Value = value;
-      this.InRange = inRange;
-    }
-  }
-  #endregion
 
   [System.Runtime.CompilerServices.CompilerGenerated]
   class NamespaceDoc { } //Namespace Documentation
